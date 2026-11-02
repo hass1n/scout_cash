@@ -40,12 +40,22 @@ def init_db(db_path=None):
             category TEXT DEFAULT 'General',
             notes TEXT DEFAULT '',
             date TEXT NOT NULL,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            owner TEXT
         )
     ''')
+    # Each user has a separate treasury: transactions belong to the email that created them.
+    # Databases created before accounts existed get the column added here.
+    if pg:
+        cursor.execute('ALTER TABLE transactions ADD COLUMN IF NOT EXISTS owner TEXT')
+    else:
+        cursor.execute('PRAGMA table_info(transactions)')
+        if 'owner' not in [row[1] for row in cursor.fetchall()]:
+            cursor.execute('ALTER TABLE transactions ADD COLUMN owner TEXT')
     cursor.execute('CREATE INDEX IF NOT EXISTS idx_transactions_date ON transactions(date)')
     cursor.execute('CREATE INDEX IF NOT EXISTS idx_transactions_type ON transactions(type)')
     cursor.execute('CREATE INDEX IF NOT EXISTS idx_transactions_currency ON transactions(currency)')
+    cursor.execute('CREATE INDEX IF NOT EXISTS idx_transactions_owner ON transactions(owner)')
     cursor.execute(f'''
         CREATE TABLE IF NOT EXISTS users (
             id {'SERIAL PRIMARY KEY' if pg else 'INTEGER PRIMARY KEY AUTOINCREMENT'},
@@ -72,24 +82,42 @@ def init_db(db_path=None):
     conn.commit()
     conn.close()
 
-def add_transaction(type_, amount, currency, party_or_purpose, category='General', notes='', date=None, db_path=None):
+def _owner_key(owner):
+    if not owner:
+        raise ValueError('A transaction owner (user email) is required')
+    return owner.strip().lower()
+
+def claim_unowned_transactions(owner, db_path=None):
+    """Gives transactions from before per-user treasuries existed to `owner`. Returns how many."""
+    owner = _owner_key(owner)
+    conn = get_db_connection(db_path)
+    cursor = conn.cursor()
+    _execute(conn, cursor, 'UPDATE transactions SET owner = ? WHERE owner IS NULL', (owner,))
+    conn.commit()
+    affected = cursor.rowcount
+    conn.close()
+    return affected
+
+def add_transaction(type_, amount, currency, party_or_purpose, category='General', notes='', date=None, db_path=None, *, owner):
+    owner = _owner_key(owner)
     if not date:
         date = datetime.now().strftime('%Y-%m-%d')
     conn = get_db_connection(db_path)
     cursor = conn.cursor()
     query = '''
-        INSERT INTO transactions (type, amount, currency, party_or_purpose, category, notes, date)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO transactions (type, amount, currency, party_or_purpose, category, notes, date, owner)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     '''
     if _is_postgres(conn):
         query += ' RETURNING id'
-    _execute(conn, cursor, query, (type_, float(amount), currency.upper(), party_or_purpose.strip(), category.strip() or 'General', (notes or '').strip(), date))
+    _execute(conn, cursor, query, (type_, float(amount), currency.upper(), party_or_purpose.strip(), category.strip() or 'General', (notes or '').strip(), date, owner))
     new_id = cursor.fetchone()['id'] if _is_postgres(conn) else cursor.lastrowid
     conn.commit()
     conn.close()
     return new_id
 
-def update_transaction(id_, type_, amount, currency, party_or_purpose, category='General', notes='', date=None, db_path=None):
+def update_transaction(id_, type_, amount, currency, party_or_purpose, category='General', notes='', date=None, db_path=None, *, owner):
+    owner = _owner_key(owner)
     if not date:
         date = datetime.now().strftime('%Y-%m-%d')
     conn = get_db_connection(db_path)
@@ -97,35 +125,38 @@ def update_transaction(id_, type_, amount, currency, party_or_purpose, category=
     _execute(conn, cursor, '''
         UPDATE transactions
         SET type = ?, amount = ?, currency = ?, party_or_purpose = ?, category = ?, notes = ?, date = ?
-        WHERE id = ?
-    ''', (type_, float(amount), currency.upper(), party_or_purpose.strip(), category.strip() or 'General', (notes or '').strip(), date, id_))
+        WHERE id = ? AND owner = ?
+    ''', (type_, float(amount), currency.upper(), party_or_purpose.strip(), category.strip() or 'General', (notes or '').strip(), date, id_, owner))
     conn.commit()
     affected = cursor.rowcount
     conn.close()
     return affected > 0
 
-def delete_transaction(id_, db_path=None):
+def delete_transaction(id_, db_path=None, *, owner):
+    owner = _owner_key(owner)
     conn = get_db_connection(db_path)
     cursor = conn.cursor()
-    _execute(conn, cursor, 'DELETE FROM transactions WHERE id = ?', (id_,))
+    _execute(conn, cursor, 'DELETE FROM transactions WHERE id = ? AND owner = ?', (id_, owner))
     conn.commit()
     affected = cursor.rowcount
     conn.close()
     return affected > 0
 
-def get_transaction(id_, db_path=None):
+def get_transaction(id_, db_path=None, *, owner):
+    owner = _owner_key(owner)
     conn = get_db_connection(db_path)
     cursor = conn.cursor()
-    _execute(conn, cursor, 'SELECT * FROM transactions WHERE id = ?', (id_,))
+    _execute(conn, cursor, 'SELECT * FROM transactions WHERE id = ? AND owner = ?', (id_, owner))
     row = cursor.fetchone()
     conn.close()
     return dict(row) if row else None
 
-def get_transactions(start_date=None, end_date=None, currency=None, type_=None, search=None, db_path=None):
+def get_transactions(start_date=None, end_date=None, currency=None, type_=None, search=None, db_path=None, *, owner):
+    owner = _owner_key(owner)
     conn = get_db_connection(db_path)
     cursor = conn.cursor()
-    query = 'SELECT * FROM transactions WHERE 1=1'
-    params = []
+    query = 'SELECT * FROM transactions WHERE owner = ?'
+    params = [owner]
 
     if start_date:
         query += ' AND date >= ?'
@@ -152,20 +183,22 @@ def get_transactions(start_date=None, end_date=None, currency=None, type_=None, 
     conn.close()
     return [dict(r) for r in rows]
 
-def get_wallet_balance(db_path=None):
+def get_wallet_balance(db_path=None, *, owner):
     """
-    Returns the total all-time wallet balance for USD and LBP.
+    Returns the owner's total all-time wallet balance for USD and LBP.
     """
+    owner = _owner_key(owner)
     conn = get_db_connection(db_path)
     cursor = conn.cursor()
-    cursor.execute('''
-        SELECT 
+    _execute(conn, cursor, '''
+        SELECT
             currency,
             type,
             COALESCE(SUM(amount), 0) as total
         FROM transactions
+        WHERE owner = ?
         GROUP BY currency, type
-    ''')
+    ''', (owner,))
     rows = cursor.fetchall()
     conn.close()
 
@@ -197,22 +230,23 @@ def get_wallet_balance(db_path=None):
     summary['lbp_balance'] = summary['lbp_income'] - summary['lbp_expense']
     return summary
 
-def get_summary_stats(start_date=None, end_date=None, db_path=None):
+def get_summary_stats(start_date=None, end_date=None, db_path=None, *, owner):
     """
-    Returns statistics within a specific date range (income sum, expense sum, counts, net for USD and LBP).
+    Returns the owner's statistics within a specific date range (income sum, expense sum, counts, net for USD and LBP).
     """
+    owner = _owner_key(owner)
     conn = get_db_connection(db_path)
     cursor = conn.cursor()
     query = '''
-        SELECT 
+        SELECT
             currency,
             type,
             COUNT(*) as count,
             COALESCE(SUM(amount), 0) as total
         FROM transactions
-        WHERE 1=1
+        WHERE owner = ?
     '''
-    params = []
+    params = [owner]
     if start_date:
         query += ' AND date >= ?'
         params.append(start_date)

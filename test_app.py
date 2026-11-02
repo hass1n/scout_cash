@@ -9,6 +9,8 @@ import database
 import push
 from app import app, AUTHORIZED_EMAIL, AUTHORIZED_PASSWORD
 
+OWNER = 'treasurer@example.com'
+
 class ScoutFinanceTestCase(unittest.TestCase):
     def setUp(self):
         # Create a temporary database for testing
@@ -39,7 +41,8 @@ class ScoutFinanceTestCase(unittest.TestCase):
             category='Donation',
             notes='For camping equipment',
             date='2026-10-01',
-            db_path=self.db_path
+            db_path=self.db_path,
+            owner=OWNER
         )
         self.assertIsNotNone(inc_id)
 
@@ -51,7 +54,8 @@ class ScoutFinanceTestCase(unittest.TestCase):
             party_or_purpose='Troop Membership Dues',
             category='Monthly Dues',
             date='2026-10-05',
-            db_path=self.db_path
+            db_path=self.db_path,
+            owner=OWNER
         )
 
         # 3. Add USD Expense
@@ -62,7 +66,8 @@ class ScoutFinanceTestCase(unittest.TestCase):
             party_or_purpose='Tents & Rope Hardware',
             category='Camping Equipment',
             date='2026-10-10',
-            db_path=self.db_path
+            db_path=self.db_path,
+            owner=OWNER
         )
 
         # 4. Add LBP Expense
@@ -73,11 +78,12 @@ class ScoutFinanceTestCase(unittest.TestCase):
             party_or_purpose='Snacks & Water for Hike',
             category='Food & Snacks',
             date='2026-10-12',
-            db_path=self.db_path
+            db_path=self.db_path,
+            owner=OWNER
         )
 
         # Check Wallet Balance
-        wallet = database.get_wallet_balance(self.db_path)
+        wallet = database.get_wallet_balance(self.db_path, owner=OWNER)
         self.assertEqual(wallet['usd_income'], 500.0)
         self.assertEqual(wallet['usd_expense'], 120.0)
         self.assertEqual(wallet['usd_balance'], 380.0)
@@ -90,7 +96,8 @@ class ScoutFinanceTestCase(unittest.TestCase):
         stats = database.get_summary_stats(
             start_date='2026-10-01',
             end_date='2026-10-09',
-            db_path=self.db_path
+            db_path=self.db_path,
+            owner=OWNER
         )
         # In this date window: USD income 500, LBP income 15,000,000, zero expenses
         self.assertEqual(stats['usd_income'], 500.0)
@@ -109,17 +116,18 @@ class ScoutFinanceTestCase(unittest.TestCase):
             category='Donation',
             notes='Updated donation',
             date='2026-10-01',
-            db_path=self.db_path
+            db_path=self.db_path,
+            owner=OWNER
         )
         self.assertTrue(ok)
-        updated = database.get_transaction(inc_id, self.db_path)
+        updated = database.get_transaction(inc_id, self.db_path, owner=OWNER)
         self.assertEqual(updated['amount'], 600.0)
         self.assertEqual(updated['party_or_purpose'], 'Donor Mr. Smith & Family')
 
         # Delete transaction
-        ok = database.delete_transaction(inc_id, self.db_path)
+        ok = database.delete_transaction(inc_id, self.db_path, owner=OWNER)
         self.assertTrue(ok)
-        self.assertIsNone(database.get_transaction(inc_id, self.db_path))
+        self.assertIsNone(database.get_transaction(inc_id, self.db_path, owner=OWNER))
 
     def test_auth_and_protected_routes(self):
         # Accessing dashboard without login redirects to /login
@@ -349,6 +357,90 @@ class UserAccountsTestCase(unittest.TestCase):
         os.environ.pop('FIREBASE_CREDENTIALS', None)
         database.register_device('t1', 'scout@example.com')
         self.assertEqual(self.orig_notify('scout@example.com', {'en': ('t', 'b')}), 0)
+
+
+class SeparateTreasuriesTestCase(unittest.TestCase):
+    """Every user has their own dashboard: transactions, balances and exports are never shared."""
+
+    def setUp(self):
+        self.db_fd, self.db_path = tempfile.mkstemp(suffix='.db')
+        self.orig_db_path = database.DEFAULT_DB_PATH
+        database.DEFAULT_DB_PATH = self.db_path
+        database.init_db()
+        for email in ('ali@example.com', 'rami@example.com'):
+            database.create_user(email.split('@')[0], email, generate_password_hash('secret1'), status='approved')
+        app.config['TESTING'] = True
+        self.client = app.test_client()
+
+    def tearDown(self):
+        database.DEFAULT_DB_PATH = self.orig_db_path
+        os.close(self.db_fd)
+        if os.path.exists(self.db_path):
+            os.remove(self.db_path)
+
+    def sign_in_as(self, email, password='secret1'):
+        self.client.get('/logout')
+        self.client.post('/login', data={'email': email, 'password': password})
+
+    def add(self, purpose, amount, currency='USD', type_='income'):
+        return self.client.post('/transaction/add', data={
+            'type': type_, 'amount': str(amount), 'currency': currency,
+            'party_or_purpose': purpose, 'category': 'General', 'date': '2026-11-02'
+        }, follow_redirects=True)
+
+    def test_each_user_sees_only_their_own_numbers(self):
+        self.sign_in_as('ali@example.com')
+        self.add('Ali dues', 300)
+        self.sign_in_as('rami@example.com')
+        self.add('Rami tents', 75, type_='expense')
+
+        res = self.client.get('/')
+        self.assertIn(b'Rami tents', res.data)
+        self.assertNotIn(b'Ali dues', res.data)
+        self.assertNotIn(b'Ali dues', self.client.get('/export').data)
+
+        self.assertEqual(database.get_wallet_balance(owner='rami@example.com')['usd_balance'], -75.0)
+        self.assertEqual(database.get_wallet_balance(owner='ali@example.com')['usd_balance'], 300.0)
+        self.assertEqual(database.get_summary_stats(owner='ali@example.com')['total_count'], 1)
+
+    def test_users_cannot_edit_or_delete_each_others_transactions(self):
+        ali_id = database.add_transaction('income', 300, 'USD', 'Ali dues', owner='ali@example.com')
+        self.sign_in_as('rami@example.com')
+
+        res = self.client.post(f'/transaction/edit/{ali_id}', data={
+            'type': 'income', 'amount': '1', 'currency': 'USD', 'party_or_purpose': 'hacked'
+        }, follow_redirects=True)
+        self.assertIn(b'Transaction not found', res.data)
+        res = self.client.post(f'/transaction/delete/{ali_id}', follow_redirects=True)
+        self.assertIn(b'Transaction not found', res.data)
+
+        untouched = database.get_transaction(ali_id, owner='ali@example.com')
+        self.assertEqual((untouched['amount'], untouched['party_or_purpose']), (300.0, 'Ali dues'))
+
+    def test_admin_has_a_separate_treasury_too(self):
+        database.add_transaction('income', 300, 'USD', 'Ali dues', owner='ali@example.com')
+        self.sign_in_as(AUTHORIZED_EMAIL, AUTHORIZED_PASSWORD)
+        self.add('Admin donation', 50)
+        res = self.client.get('/')
+        self.assertIn(b'Admin donation', res.data)
+        self.assertNotIn(b'Ali dues', res.data)
+
+    def test_older_transactions_without_owner_go_to_admin(self):
+        conn = database.get_db_connection()
+        conn.execute("INSERT INTO transactions (type, amount, currency, party_or_purpose, date) "
+                     "VALUES ('income', 10, 'USD', 'Before accounts', '2026-10-01')")
+        conn.commit()
+        conn.close()
+
+        self.assertEqual(database.claim_unowned_transactions(AUTHORIZED_EMAIL), 1)
+        self.assertEqual(len(database.get_transactions(owner=AUTHORIZED_EMAIL)), 1)
+        self.assertEqual(database.get_transactions(owner='ali@example.com'), [])
+
+    def test_owner_is_required(self):
+        with self.assertRaises(TypeError):
+            database.get_transactions()
+        with self.assertRaises(ValueError):
+            database.get_wallet_balance(owner='')
 
 
 if __name__ == '__main__':

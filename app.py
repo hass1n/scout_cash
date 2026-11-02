@@ -24,12 +24,19 @@ AUTHORIZED_PASSWORD = os.environ.get('ADMIN_PASSWORD', '1234')
 
 MIN_PASSWORD_LENGTH = 6
 
-# Initialize database on module load
+# Initialize database on module load. Transactions recorded before each user had
+# a separate treasury belong to the admin, who entered them.
 database.init_db()
+database.claim_unowned_transactions(AUTHORIZED_EMAIL)
 
 
 def is_admin():
     return session.get('user', '').lower() == AUTHORIZED_EMAIL.lower()
+
+
+def current_owner():
+    """The signed-in user's email: every transaction query is limited to it."""
+    return session['user'].lower()
 
 
 def current_language():
@@ -315,12 +322,13 @@ def dashboard():
         end_date = ''
 
     # Overall Total Wallet Balance (all time)
-    wallet = database.get_wallet_balance()
+    wallet = database.get_wallet_balance(owner=current_owner())
 
     # Period Statistics (filtered by date range)
     period_stats = database.get_summary_stats(
         start_date=start_date or None,
-        end_date=end_date or None
+        end_date=end_date or None,
+        owner=current_owner()
     )
 
     # All filtered transactions
@@ -329,7 +337,8 @@ def dashboard():
         end_date=end_date or None,
         currency=currency if currency in ('USD', 'LBP') else None,
         type_=trans_type if trans_type in ('income', 'expense') else None,
-        search=search or None
+        search=search or None,
+        owner=current_owner()
     )
 
     # Split for quick inspection: Incomes ("From Who") vs Expenses ("For What")
@@ -396,10 +405,11 @@ def add_transaction():
         party_or_purpose=party_or_purpose,
         category=category or 'General',
         notes=notes,
-        date=t_date
+        date=t_date,
+        owner=current_owner()
     )
 
-    t_label = 'Income (وارد)' if trans_type == 'income' else 'Expense (مصروف)'
+    t_label ='Income (وارد)' if trans_type == 'income' else 'Expense (مصروف)'
     flash(f'{t_label} of {format_currency_filter(amount, currency)} added successfully!', 'success')
     return redirect(request.referrer or url_for('dashboard'))
 
@@ -407,7 +417,7 @@ def add_transaction():
 @app.route('/transaction/edit/<int:trans_id>', methods=['POST'])
 @login_required
 def edit_transaction(trans_id):
-    existing = database.get_transaction(trans_id)
+    existing = database.get_transaction(trans_id, owner=current_owner())
     if not existing:
         flash('Transaction not found.', 'danger')
         return redirect(request.referrer or url_for('dashboard'))
@@ -442,7 +452,8 @@ def edit_transaction(trans_id):
         party_or_purpose=party_or_purpose,
         category=category or 'General',
         notes=notes,
-        date=t_date
+        date=t_date,
+        owner=current_owner()
     )
 
     flash('Transaction updated successfully!', 'success')
@@ -452,11 +463,11 @@ def edit_transaction(trans_id):
 @app.route('/transaction/delete/<int:trans_id>', methods=['POST'])
 @login_required
 def delete_transaction(trans_id):
-    existing = database.get_transaction(trans_id)
+    existing = database.get_transaction(trans_id, owner=current_owner())
     if not existing:
         flash('Transaction not found.', 'danger')
     else:
-        database.delete_transaction(trans_id)
+        database.delete_transaction(trans_id, owner=current_owner())
         flash('Transaction deleted successfully.', 'info')
     return redirect(request.referrer or url_for('dashboard'))
 
@@ -475,7 +486,8 @@ def export_csv():
         end_date=end_date or None,
         currency=currency if currency in ('USD', 'LBP') else None,
         type_=trans_type if trans_type in ('income', 'expense') else None,
-        search=search or None
+        search=search or None,
+        owner=current_owner()
     )
 
     si = io.StringIO()
