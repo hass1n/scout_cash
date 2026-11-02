@@ -1,0 +1,850 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard &bull; Scout Sandou2 Finance{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-lg-4 dashboard-page">
+
+    <!-- Top Greeting & Header Bar -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+        <div>
+            <h2 class="fw-bold mb-1 text-dark d-flex align-items-center gap-2">
+                <span>⚜️ Scout Treasury Overview</span>
+            </h2>
+            <p class="text-muted mb-0 small">
+                Track income (من مين), manage expenses (لشو), and monitor real-time $ & ل.ل cash box balances.
+            </p>
+        </div>
+        <div class="dashboard-actions d-flex align-items-center gap-2 flex-wrap">
+            <!-- This Month Direct Quick Action -->
+            <a href="{{ url_for('dashboard', preset='this_month') }}" 
+               class="btn {% if preset == 'this_month' %}btn-primary shadow{% else %}btn-outline-primary bg-white shadow-sm{% endif %}">
+                <i class="fa-solid fa-calendar-star me-1 text-warning"></i>
+                <strong>📅 This Month (هذا الشهر)</strong>
+            </a>
+            <!-- Add Income -->
+            <button class="btn btn-scout-accent shadow-sm" data-bs-toggle="modal" data-bs-target="#incomeModal">
+                <i class="fa-solid fa-circle-plus me-1"></i> + Add Income (وارد)
+            </button>
+            <!-- Add Expense -->
+            <button class="btn btn-outline-danger-scout shadow-sm" data-bs-toggle="modal" data-bs-target="#expenseModal">
+                <i class="fa-solid fa-circle-minus me-1"></i> - Add Expense (مصروف)
+            </button>
+        </div>
+    </div>
+
+    <!-- WALLET BALANCES (ALL-TIME CASH BOX) -->
+    <div class="row g-3 mb-4">
+        <!-- USD Wallet Balance Card -->
+        <div class="col-12 col-md-6">
+            <div class="card wallet-card wallet-usd border-0 shadow-sm rounded-4 h-100 overflow-hidden">
+                <div class="card-body p-4 position-relative">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <span class="badge bg-usd-pill px-3 py-1 rounded-pill fw-semibold mb-2">
+                                <i class="fa-solid fa-dollar-sign me-1"></i> $ Wallet / صندوق الدولار
+                            </span>
+                            <div class="text-muted small">Current Total Balance in Cash Box</div>
+                        </div>
+                        <div class="wallet-icon-circle usd-circle shadow-sm">
+                            <i class="fa-solid fa-vault"></i>
+                        </div>
+                    </div>
+                    <div class="wallet-amount text-success fw-bold display-6 mb-3">
+                        {{ wallet.usd_balance | format_currency('USD') }}
+                    </div>
+                    <div class="row g-2 pt-2 border-top border-light">
+                        <div class="col-6">
+                            <div class="small text-muted">Total $ Incomes</div>
+                            <div class="fw-semibold text-dark">
+                                <i class="fa-solid fa-arrow-down-left text-success me-1"></i>
+                                {{ wallet.usd_income | format_currency('USD') }}
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="small text-muted">Total $ Expenses</div>
+                            <div class="fw-semibold text-dark">
+                                <i class="fa-solid fa-arrow-up-right text-danger me-1"></i>
+                                {{ wallet.usd_expense | format_currency('USD') }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- LBP Wallet Balance Card -->
+        <div class="col-12 col-md-6">
+            <div class="card wallet-card wallet-lbp border-0 shadow-sm rounded-4 h-100 overflow-hidden">
+                <div class="card-body p-4 position-relative">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <span class="badge bg-lbp-pill px-3 py-1 rounded-pill fw-semibold mb-2">
+                                <i class="fa-solid fa-money-bill-wave me-1"></i> ل.ل Wallet / صندوق الليرة
+                            </span>
+                            <div class="text-muted small">Current Total Balance in Cash Box</div>
+                        </div>
+                        <div class="wallet-icon-circle lbp-circle shadow-sm">
+                            <i class="fa-solid fa-cedi-sign"></i>
+                        </div>
+                    </div>
+                    <div class="wallet-amount text-primary fw-bold display-6 mb-3">
+                        {{ wallet.lbp_balance | format_currency('LBP') }}
+                    </div>
+                    <div class="row g-2 pt-2 border-top border-light">
+                        <div class="col-6">
+                            <div class="small text-muted">Total ل.ل Incomes</div>
+                            <div class="fw-semibold text-dark">
+                                <i class="fa-solid fa-arrow-down-left text-success me-1"></i>
+                                {{ wallet.lbp_income | format_currency('LBP') }}
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="small text-muted">Total ل.ل Expenses</div>
+                            <div class="fw-semibold text-dark">
+                                <i class="fa-solid fa-arrow-up-right text-danger me-1"></i>
+                                {{ wallet.lbp_expense | format_currency('LBP') }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FILTER & REPORTING SECTION -->
+    <div class="card border-0 shadow-sm rounded-4 mb-4">
+        <div class="card-header bg-white border-0 pt-4 pb-2 px-4 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
+            <div>
+                <h5 class="fw-bold mb-0 text-dark">
+                    <i class="fa-solid fa-filter text-scout me-2"></i> Date Range & Filter Transactions
+                </h5>
+                <span class="text-muted small">Select dates or quick presets to inspect specific transaction periods</span>
+            </div>
+            <!-- Quick Preset Buttons -->
+            <div class="period-presets btn-group btn-group-sm flex-wrap shadow-none">
+                <a href="{{ url_for('dashboard', preset='all') }}" 
+                   class="btn btn-outline-secondary {% if preset == 'all' %}active{% endif %}">
+                   All Time
+                </a>
+                <a href="{{ url_for('dashboard', preset='this_month') }}" 
+                   class="btn btn-outline-secondary {% if preset == 'this_month' %}active fw-bold{% endif %}">
+                   📅 This Month ({{ current_month_name }})
+                </a>
+                <a href="{{ url_for('dashboard', preset='today') }}" 
+                   class="btn btn-outline-secondary {% if preset == 'today' %}active{% endif %}">
+                   Today
+                </a>
+                <a href="{{ url_for('dashboard', preset='this_year') }}" 
+                   class="btn btn-outline-secondary {% if preset == 'this_year' %}active{% endif %}">
+                   This Year
+                </a>
+            </div>
+        </div>
+
+        <div class="card-body px-4 pb-4">
+            <!-- Filter Form -->
+            <form method="GET" action="{{ url_for('dashboard') }}" class="row g-3 align-items-end" id="filterForm">
+                <input type="hidden" name="preset" value="custom">
+
+                <div class="col-12 col-sm-6 col-lg-3">
+                    <label class="form-label small fw-semibold text-muted">
+                        <i class="fa-regular fa-calendar me-1"></i> From Date (من تاريخ)
+                    </label>
+                    <input type="date" class="form-control" name="start_date" id="startDate" value="{{ start_date }}">
+                </div>
+
+                <div class="col-12 col-sm-6 col-lg-3">
+                    <label class="form-label small fw-semibold text-muted">
+                        <i class="fa-regular fa-calendar-check me-1"></i> To Date (إلى تاريخ)
+                    </label>
+                    <input type="date" class="form-control" name="end_date" id="endDate" value="{{ end_date }}">
+                </div>
+
+                <div class="col-12 col-sm-6 col-lg-2">
+                    <label class="form-label small fw-semibold text-muted">
+                        <i class="fa-solid fa-coins me-1"></i> Currency
+                    </label>
+                    <select class="form-select" name="currency">
+                        <option value="" {% if not currency %}selected{% endif %}>All Currencies</option>
+                        <option value="USD" {% if currency == 'USD' %}selected{% endif %}>$</option>
+                        <option value="LBP" {% if currency == 'LBP' %}selected{% endif %}>ل.ل</option>
+                    </select>
+                </div>
+
+                <div class="col-12 col-sm-6 col-lg-2">
+                    <label class="form-label small fw-semibold text-muted">
+                        <i class="fa-solid fa-layer-group me-1"></i> Type
+                    </label>
+                    <select class="form-select" name="type">
+                        <option value="" {% if not trans_type %}selected{% endif %}>All Types</option>
+                        <option value="income" {% if trans_type == 'income' %}selected{% endif %}>Income (واردات)</option>
+                        <option value="expense" {% if trans_type == 'expense' %}selected{% endif %}>Expense (مصاريف)</option>
+                    </select>
+                </div>
+
+                <div class="col-12 col-lg-2 d-flex gap-2">
+                    <button type="submit" class="btn btn-scout-primary flex-grow-1 shadow-sm">
+                        <i class="fa-solid fa-magnifying-glass me-1"></i> Filter
+                    </button>
+                    <a href="{{ url_for('dashboard', preset='all') }}" class="btn btn-light border" title="Reset Filters">
+                        <i class="fa-solid fa-rotate-left"></i>
+                    </a>
+                </div>
+            </form>
+
+            <!-- PERIOD SUMMARY HIGHLIGHT CARD -->
+            <div class="period-summary-banner mt-4 p-3 rounded-3 border">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-3">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="badge bg-dark px-2 py-1">
+                            <i class="fa-solid fa-chart-pie me-1"></i> Summary for Selected Period
+                        </span>
+                        <span class="text-muted small">
+                            {% if start_date and end_date %}
+                                From <strong>{{ start_date }}</strong> to <strong>{{ end_date }}</strong>
+                            {% elif start_date %}
+                                Starting from <strong>{{ start_date }}</strong>
+                            {% elif end_date %}
+                                Up to <strong>{{ end_date }}</strong>
+                            {% else %}
+                                <strong>All Time Overview</strong>
+                            {% endif %}
+                            &bull; ({{ period_stats.total_count }} transactions)
+                        </span>
+                    </div>
+
+                    <!-- Export & Print Actions -->
+                    <div class="d-flex gap-2">
+                        <a href="{{ url_for('export_csv', start_date=start_date, end_date=end_date, currency=currency, type=trans_type, search=search) }}" 
+                           class="btn btn-outline-success btn-sm bg-white shadow-sm">
+                            <i class="fa-solid fa-file-excel me-1"></i> Export CSV
+                        </a>
+                        <button onclick="window.print()" class="btn btn-outline-secondary btn-sm bg-white shadow-sm">
+                            <i class="fa-solid fa-print me-1"></i> Print Report
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 4 KPI Badges for Period -->
+                <div class="row g-2 text-center">
+                    <!-- Income USD -->
+                    <div class="col-6 col-md-3">
+                        <div class="p-2 rounded bg-white border">
+                            <div class="text-muted extra-small">Income ($) &bull; {{ period_stats.usd_income_count }} tx</div>
+                            <div class="fw-bold text-success fs-5">
+                                {{ period_stats.usd_income | format_currency('USD') }}
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Income LBP -->
+                    <div class="col-6 col-md-3">
+                        <div class="p-2 rounded bg-white border">
+                            <div class="text-muted extra-small">Income (ل.ل) &bull; {{ period_stats.lbp_income_count }} tx</div>
+                            <div class="fw-bold text-success fs-5">
+                                {{ period_stats.lbp_income | format_currency('LBP') }}
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Expense USD -->
+                    <div class="col-6 col-md-3">
+                        <div class="p-2 rounded bg-white border">
+                            <div class="text-muted extra-small">Expenses ($) &bull; {{ period_stats.usd_expense_count }} tx</div>
+                            <div class="fw-bold text-danger fs-5">
+                                {{ period_stats.usd_expense | format_currency('USD') }}
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Expense LBP -->
+                    <div class="col-6 col-md-3">
+                        <div class="p-2 rounded bg-white border">
+                            <div class="text-muted extra-small">Expenses (ل.ل) &bull; {{ period_stats.lbp_expense_count }} tx</div>
+                            <div class="fw-bold text-danger fs-5">
+                                {{ period_stats.lbp_expense | format_currency('LBP') }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Period Net Flow -->
+                <div class="row g-2 mt-1 text-center">
+                    <div class="col-12 col-md-6">
+                        <div class="py-2 px-3 rounded bg-light border d-flex justify-content-between align-items-center">
+                            <span class="small fw-semibold text-secondary">
+                                Net Period Result ($):
+                            </span>
+                            <span class="fw-bold {% if period_stats.usd_net >= 0 %}text-success{% else %}text-danger{% endif %}">
+                                {{ period_stats.usd_net | format_currency('USD') }}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <div class="py-2 px-3 rounded bg-light border d-flex justify-content-between align-items-center">
+                            <span class="small fw-semibold text-secondary">
+                                Net Period Result (ل.ل):
+                            </span>
+                            <span class="fw-bold {% if period_stats.lbp_net >= 0 %}text-primary{% else %}text-danger{% endif %}">
+                                {{ period_stats.lbp_net | format_currency('LBP') }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TRANSACTIONS SECTION WITH TABS -->
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-5">
+        <div class="card-header bg-white border-bottom pt-3 px-4">
+            <ul class="nav nav-pills card-header-pills transaction-tabs" id="transactionTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active px-3" id="all-tab" data-bs-toggle="pill" data-bs-target="#all-tab-pane" type="button" role="tab">
+                        <i class="fa-solid fa-list-ul me-1"></i> All Transactions ({{ transactions|length }})
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link px-3 text-success" id="income-tab" data-bs-toggle="pill" data-bs-target="#income-tab-pane" type="button" role="tab">
+                        <i class="fa-solid fa-arrow-down-left me-1"></i> Incomes / من مين ({{ incomes|length }})
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link px-3 text-danger" id="expense-tab" data-bs-toggle="pill" data-bs-target="#expense-tab-pane" type="button" role="tab">
+                        <i class="fa-solid fa-arrow-up-right me-1"></i> Expenses / لشو ({{ expenses|length }})
+                    </button>
+                </li>
+            </ul>
+        </div>
+
+        <div class="card-body p-0">
+            <div class="tab-content" id="transactionTabContent">
+                
+                <!-- TAB 1: ALL TRANSACTIONS -->
+                <div class="tab-pane fade show active" id="all-tab-pane" role="tabpanel" tabindex="0">
+                    {% if transactions %}
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0 transaction-table">
+                            <thead class="table-light text-muted small">
+                                <tr>
+                                    <th class="ps-4">Date</th>
+                                    <th>Type</th>
+                                    <th>Party / Purpose</th>
+                                    <th>Category</th>
+                                    <th>Amount</th>
+                                    <th>Notes</th>
+                                    <th class="text-end pe-4">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for t in transactions %}
+                                <tr>
+                                    <td class="ps-4 text-nowrap">
+                                        <i class="fa-regular fa-calendar-days text-muted me-1"></i>
+                                        <span class="fw-semibold">{{ t.date }}</span>
+                                    </td>
+                                    <td>
+                                        {% if t.type == 'income' %}
+                                            <span class="badge badge-income rounded-pill">
+                                                <i class="fa-solid fa-arrow-down-left me-1"></i> Income
+                                            </span>
+                                        {% else %}
+                                            <span class="badge badge-expense rounded-pill">
+                                                <i class="fa-solid fa-arrow-up-right me-1"></i> Expense
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="fw-bold text-dark">{{ t.party_or_purpose }}</div>
+                                        <div class="extra-small text-muted">
+                                            {% if t.type == 'income' %}From who (من مين){% else %}For what (السبب / الغاية){% endif %}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-light text-secondary border">
+                                            {{ t.category }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-1">
+                                            <span class="fw-bold {% if t.type == 'income' %}text-success{% else %}text-danger{% endif %} fs-6">
+                                                {% if t.type == 'income' %}+{% else %}-{% endif %}
+                                                {{ t.amount | format_currency(t.currency) }}
+                                            </span>
+                                            <span class="badge {% if t.currency == 'USD' %}bg-usd-pill{% else %}bg-lbp-pill{% endif %} extra-small">
+                                                {{ '$' if t.currency == 'USD' else 'ل.ل' }}
+                                            </span>
+                                        </div>
+                                    </td>
+                                    <td class="small text-muted text-truncate max-notes-col">
+                                        {{ t.notes or '-' }}
+                                    </td>
+                                    <td class="text-end pe-4 text-nowrap">
+                                        <button class="btn btn-outline-secondary btn-sm rounded-pill btn-edit" 
+                                                data-id="{{ t.id }}"
+                                                data-type="{{ t.type }}"
+                                                data-amount="{{ t.amount }}"
+                                                data-currency="{{ t.currency }}"
+                                                data-party="{{ t.party_or_purpose }}"
+                                                data-category="{{ t.category }}"
+                                                data-notes="{{ t.notes }}"
+                                                data-date="{{ t.date }}"
+                                                data-bs-toggle="modal" 
+                                                data-bs-target="#editModal"
+                                                title="Edit Transaction">
+                                            <i class="fa-solid fa-pen-to-square"></i>
+                                        </button>
+                                        <button class="btn btn-outline-danger btn-sm rounded-pill btn-delete ms-1"
+                                                data-id="{{ t.id }}"
+                                                data-party="{{ t.party_or_purpose }}"
+                                                data-amount="{{ t.amount | format_currency(t.currency) }}"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#deleteModal"
+                                                title="Delete Transaction">
+                                            <i class="fa-regular fa-trash-can"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="fa-regular fa-folder-open text-muted display-4 mb-3"></i>
+                        <h6 class="text-secondary fw-semibold">No transactions found for this selection</h6>
+                        <p class="text-muted small">Try adjusting your date range or add your first transaction using the buttons above.</p>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- TAB 2: INCOMES ONLY ("FROM WHO") -->
+                <div class="tab-pane fade" id="income-tab-pane" role="tabpanel" tabindex="0">
+                    {% if incomes %}
+                    <div class="p-3 bg-light border-bottom d-flex justify-content-between align-items-center">
+                        <span class="fw-bold text-success">
+                            <i class="fa-solid fa-hand-holding-dollar me-1"></i> Incomes Breakdown ("From Who")
+                        </span>
+                        <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-1">
+                            {{ period_stats.usd_income | format_currency('USD') }} &bull; {{ period_stats.lbp_income | format_currency('LBP') }}
+                        </span>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light text-muted small">
+                                <tr>
+                                    <th class="ps-4">Date</th>
+                                    <th>From Who (من مين)</th>
+                                    <th>Category</th>
+                                    <th>Amount</th>
+                                    <th>Notes</th>
+                                    <th class="text-end pe-4">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for inc in incomes %}
+                                <tr>
+                                    <td class="ps-4 text-nowrap fw-semibold">{{ inc.date }}</td>
+                                    <td>
+                                        <div class="fw-bold text-dark fs-6">{{ inc.party_or_purpose }}</div>
+                                        <span class="badge bg-light text-muted border extra-small">Source / Contributor</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-light text-secondary border">{{ inc.category }}</span>
+                                    </td>
+                                    <td>
+                                        <span class="fw-bold text-success fs-6">+{{ inc.amount | format_currency(inc.currency) }}</span>
+                                        <span class="badge {% if inc.currency == 'USD' %}bg-usd-pill{% else %}bg-lbp-pill{% endif %} extra-small">
+                                            {{ '$' if inc.currency == 'USD' else 'ل.ل' }}
+                                        </span>
+                                    </td>
+                                    <td class="small text-muted">{{ inc.notes or '-' }}</td>
+                                    <td class="text-end pe-4 text-nowrap">
+                                        <button class="btn btn-outline-secondary btn-sm rounded-pill btn-edit" 
+                                                data-id="{{ inc.id }}"
+                                                data-type="{{ inc.type }}"
+                                                data-amount="{{ inc.amount }}"
+                                                data-currency="{{ inc.currency }}"
+                                                data-party="{{ inc.party_or_purpose }}"
+                                                data-category="{{ inc.category }}"
+                                                data-notes="{{ inc.notes }}"
+                                                data-date="{{ inc.date }}"
+                                                data-bs-toggle="modal" 
+                                                data-bs-target="#editModal">
+                                            <i class="fa-solid fa-pen-to-square"></i>
+                                        </button>
+                                        <button class="btn btn-outline-danger btn-sm rounded-pill btn-delete ms-1"
+                                                data-id="{{ inc.id }}"
+                                                data-party="{{ inc.party_or_purpose }}"
+                                                data-amount="{{ inc.amount | format_currency(inc.currency) }}"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#deleteModal">
+                                            <i class="fa-regular fa-trash-can"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="fa-solid fa-coins text-muted display-4 mb-3"></i>
+                        <h6 class="text-secondary fw-semibold">No income transactions found in this period</h6>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- TAB 3: EXPENSES ONLY ("FOR WHAT") -->
+                <div class="tab-pane fade" id="expense-tab-pane" role="tabpanel" tabindex="0">
+                    {% if expenses %}
+                    <div class="p-3 bg-light border-bottom d-flex justify-content-between align-items-center">
+                        <span class="fw-bold text-danger">
+                            <i class="fa-solid fa-receipt me-1"></i> Expenses Breakdown ("For What")
+                        </span>
+                        <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-3 py-1">
+                            {{ period_stats.usd_expense | format_currency('USD') }} &bull; {{ period_stats.lbp_expense | format_currency('LBP') }}
+                        </span>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light text-muted small">
+                                <tr>
+                                    <th class="ps-4">Date</th>
+                                    <th>For What (السبب / الغاية)</th>
+                                    <th>Category</th>
+                                    <th>Amount</th>
+                                    <th>Notes</th>
+                                    <th class="text-end pe-4">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for exp in expenses %}
+                                <tr>
+                                    <td class="ps-4 text-nowrap fw-semibold">{{ exp.date }}</td>
+                                    <td>
+                                        <div class="fw-bold text-dark fs-6">{{ exp.party_or_purpose }}</div>
+                                        <span class="badge bg-light text-muted border extra-small">Troop Expense / Purchase</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-light text-secondary border">{{ exp.category }}</span>
+                                    </td>
+                                    <td>
+                                        <span class="fw-bold text-danger fs-6">-{{ exp.amount | format_currency(exp.currency) }}</span>
+                                        <span class="badge {% if exp.currency == 'USD' %}bg-usd-pill{% else %}bg-lbp-pill{% endif %} extra-small">
+                                            {{ '$' if exp.currency == 'USD' else 'ل.ل' }}
+                                        </span>
+                                    </td>
+                                    <td class="small text-muted">{{ exp.notes or '-' }}</td>
+                                    <td class="text-end pe-4 text-nowrap">
+                                        <button class="btn btn-outline-secondary btn-sm rounded-pill btn-edit" 
+                                                data-id="{{ exp.id }}"
+                                                data-type="{{ exp.type }}"
+                                                data-amount="{{ exp.amount }}"
+                                                data-currency="{{ exp.currency }}"
+                                                data-party="{{ exp.party_or_purpose }}"
+                                                data-category="{{ exp.category }}"
+                                                data-notes="{{ exp.notes }}"
+                                                data-date="{{ exp.date }}"
+                                                data-bs-toggle="modal" 
+                                                data-bs-target="#editModal">
+                                            <i class="fa-solid fa-pen-to-square"></i>
+                                        </button>
+                                        <button class="btn btn-outline-danger btn-sm rounded-pill btn-delete ms-1"
+                                                data-id="{{ exp.id }}"
+                                                data-party="{{ exp.party_or_purpose }}"
+                                                data-amount="{{ exp.amount | format_currency(exp.currency) }}"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#deleteModal">
+                                            <i class="fa-regular fa-trash-can"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="fa-solid fa-basket-shopping text-muted display-4 mb-3"></i>
+                        <h6 class="text-secondary fw-semibold">No expense records found in this period</h6>
+                    </div>
+                    {% endif %}
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================== -->
+<!-- MODAL: ADD INCOME (وارد جديد) -->
+<!-- ============================================== -->
+<div class="modal fade" id="incomeModal" tabindex="-1" aria-labelledby="incomeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+            <form action="{{ url_for('add_transaction') }}" method="POST">
+                <input type="hidden" name="type" value="income">
+                <div class="modal-header bg-scout-income text-white rounded-top-4 py-3">
+                    <h5 class="modal-title fw-bold" id="incomeModalLabel">
+                        <i class="fa-solid fa-arrow-down-left me-2"></i> Add Income &bull; وارد جديد
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <!-- Amount & Currency -->
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold text-secondary">Amount & Currency (المبلغ والعملة)</label>
+                        <div class="row g-2">
+                            <div class="col-7">
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light text-muted fw-bold">$ / ل.ل</span>
+                                    <input type="number" step="any" min="0.01" class="form-control" name="amount" required placeholder="0.00">
+                                </div>
+                            </div>
+                            <div class="col-5">
+                                <div class="btn-group w-100" role="group">
+                                    <input type="radio" class="btn-check" name="currency" id="incUsd" value="USD" checked>
+                                    <label class="btn btn-outline-success" for="incUsd">$</label>
+                                    <input type="radio" class="btn-check" name="currency" id="incLbp" value="LBP">
+                                    <label class="btn btn-outline-primary" for="incLbp">ل.ل</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- From Who -->
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold text-secondary">
+                            <i class="fa-solid fa-user me-1 text-success"></i> From Who? (من مين / مصدر المال) <span class="text-danger">*</span>
+                        </label>
+                        <input type="text" class="form-control" name="party_or_purpose" required placeholder="e.g. Leader Ahmad, Donor Name, Monthly Scout Dues">
+                    </div>
+
+                    <!-- Category & Date -->
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label small fw-semibold text-secondary">Category (الفئة)</label>
+                            <input type="text" class="form-control" name="category" list="incomeCategories" placeholder="Select or type">
+                            <datalist id="incomeCategories">
+                                <option value="Monthly Dues (اشتراكات)">
+                                <option value="Donation (تبرعات)">
+                                <option value="Fundraiser (ريع نشاط)">
+                                <option value="Sponsorship (رعاية)">
+                                <option value="Camp Fees (رسوم مخيم)">
+                                <option value="General (عام)">
+                            </datalist>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small fw-semibold text-secondary">Date (التاريخ)</label>
+                            <input type="date" class="form-control" name="date" value="{{ today_date }}" required>
+                        </div>
+                    </div>
+
+                    <!-- Notes -->
+                    <div class="mb-2">
+                        <label class="form-label small fw-semibold text-secondary">Notes / Description (ملاحظات)</label>
+                        <textarea class="form-control" name="notes" rows="2" placeholder="Optional details..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0 px-4 pb-4">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-scout-accent px-4 shadow-sm">
+                        <i class="fa-solid fa-check me-1"></i> Save Income
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================== -->
+<!-- MODAL: ADD EXPENSE (مصروف جديد) -->
+<!-- ============================================== -->
+<div class="modal fade" id="expenseModal" tabindex="-1" aria-labelledby="expenseModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+            <form action="{{ url_for('add_transaction') }}" method="POST">
+                <input type="hidden" name="type" value="expense">
+                <div class="modal-header bg-scout-expense text-white rounded-top-4 py-3">
+                    <h5 class="modal-title fw-bold" id="expenseModalLabel">
+                        <i class="fa-solid fa-arrow-up-right me-2"></i> Add Expense &bull; مصروف جديد
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <!-- Amount & Currency -->
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold text-secondary">Amount & Currency (المبلغ والعملة)</label>
+                        <div class="row g-2">
+                            <div class="col-7">
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light text-muted fw-bold">$ / ل.ل</span>
+                                    <input type="number" step="any" min="0.01" class="form-control" name="amount" required placeholder="0.00">
+                                </div>
+                            </div>
+                            <div class="col-5">
+                                <div class="btn-group w-100" role="group">
+                                    <input type="radio" class="btn-check" name="currency" id="expUsd" value="USD" checked>
+                                    <label class="btn btn-outline-success" for="expUsd">$</label>
+                                    <input type="radio" class="btn-check" name="currency" id="expLbp" value="LBP">
+                                    <label class="btn btn-outline-primary" for="expLbp">ل.ل</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- For What -->
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold text-secondary">
+                            <i class="fa-solid fa-receipt me-1 text-danger"></i> For What? (السبب / لشو اندفعت) <span class="text-danger">*</span>
+                        </label>
+                        <input type="text" class="form-control" name="party_or_purpose" required placeholder="e.g. Tent repairs, Bus transport, Food for camp, Uniforms">
+                    </div>
+
+                    <!-- Category & Date -->
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label small fw-semibold text-secondary">Category (الفئة)</label>
+                            <input type="text" class="form-control" name="category" list="expenseCategories" placeholder="Select or type">
+                            <datalist id="expenseCategories">
+                                <option value="Camping Equipment (عتاد وتجهيزات)">
+                                <option value="Food & Snacks (تغذية)">
+                                <option value="Transportation (مواصلات وبنزين)">
+                                <option value="Troop Room Rent (إيجار المقر)">
+                                <option value="Printing & Badges (قرطاسية وشارات)">
+                                <option value="Uniforms (ألبسة كشفية)">
+                                <option value="Maintenance (صيانة)">
+                                <option value="General (عام)">
+                            </datalist>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small fw-semibold text-secondary">Date (التاريخ)</label>
+                            <input type="date" class="form-control" name="date" value="{{ today_date }}" required>
+                        </div>
+                    </div>
+
+                    <!-- Notes -->
+                    <div class="mb-2">
+                        <label class="form-label small fw-semibold text-secondary">Notes / Description (ملاحظات)</label>
+                        <textarea class="form-control" name="notes" rows="2" placeholder="Optional details, receipt number..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0 px-4 pb-4">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-outline-danger-scout px-4 shadow-sm">
+                        <i class="fa-solid fa-check me-1"></i> Save Expense
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================== -->
+<!-- MODAL: EDIT TRANSACTION -->
+<!-- ============================================== -->
+<div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+            <form id="editForm" method="POST">
+                <div class="modal-header bg-dark text-white rounded-top-4 py-3">
+                    <h5 class="modal-title fw-bold" id="editModalLabel">
+                        <i class="fa-solid fa-pen-to-square me-2"></i> Edit Transaction
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <!-- Type Selector -->
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold text-secondary">Transaction Type</label>
+                        <div class="btn-group w-100" role="group">
+                            <input type="radio" class="btn-check" name="type" id="editTypeIncome" value="income">
+                            <label class="btn btn-outline-success" for="editTypeIncome">
+                                <i class="fa-solid fa-arrow-down-left me-1"></i> Income (وارد)
+                            </label>
+                            <input type="radio" class="btn-check" name="type" id="editTypeExpense" value="expense">
+                            <label class="btn btn-outline-danger" for="editTypeExpense">
+                                <i class="fa-solid fa-arrow-up-right me-1"></i> Expense (مصروف)
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Amount & Currency -->
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold text-secondary">Amount & Currency</label>
+                        <div class="row g-2">
+                            <div class="col-7">
+                                <input type="number" step="any" min="0.01" class="form-control" name="amount" id="editAmount" required>
+                            </div>
+                            <div class="col-5">
+                                <div class="btn-group w-100" role="group">
+                                    <input type="radio" class="btn-check" name="currency" id="editCurrencyUsd" value="USD">
+                                    <label class="btn btn-outline-success" for="editCurrencyUsd">$</label>
+                                    <input type="radio" class="btn-check" name="currency" id="editCurrencyLbp" value="LBP">
+                                    <label class="btn btn-outline-primary" for="editCurrencyLbp">ل.ل</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Party / Purpose -->
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold text-secondary" id="editPartyLabel">
+                            From Who / For What
+                        </label>
+                        <input type="text" class="form-control" name="party_or_purpose" id="editParty" required>
+                    </div>
+
+                    <!-- Category & Date -->
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label small fw-semibold text-secondary">Category</label>
+                            <input type="text" class="form-control" name="category" id="editCategory">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small fw-semibold text-secondary">Date</label>
+                            <input type="date" class="form-control" name="date" id="editDate" required>
+                        </div>
+                    </div>
+
+                    <!-- Notes -->
+                    <div class="mb-2">
+                        <label class="form-label small fw-semibold text-secondary">Notes</label>
+                        <textarea class="form-control" name="notes" id="editNotes" rows="2"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0 px-4 pb-4">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary px-4 shadow-sm">
+                        <i class="fa-solid fa-floppy-disk me-1"></i> Update Record
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================== -->
+<!-- MODAL: DELETE CONFIRMATION -->
+<!-- ============================================== -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content border-0 shadow-lg rounded-4 text-center p-4">
+            <div class="text-danger mb-3">
+                <i class="fa-solid fa-triangle-exclamation display-4"></i>
+            </div>
+            <h5 class="fw-bold mb-2">Delete Transaction?</h5>
+            <p class="text-muted small mb-4">
+                Are you sure you want to delete <span id="delPartyName" class="fw-bold text-dark"></span> (<span id="delAmount"></span>)? This cannot be undone.
+            </p>
+            <form id="deleteForm" method="POST">
+                <div class="d-flex gap-2 justify-content-center">
+                    <button type="button" class="btn btn-light px-3" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger px-3 shadow-sm">
+                        <i class="fa-solid fa-trash-can me-1"></i> Delete
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

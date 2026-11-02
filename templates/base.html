@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="{{ language }}" dir="{{ 'rtl' if language == 'ar' else 'ltr' }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Scout Treasury - Sandou2{% endblock %}</title>
+    <!-- Bootstrap 5 CSS -->
+    {% if language == 'ar' %}
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+    {% else %}
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    {% endif %}
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="bg-light">
+
+    {% if session.get('user') %}
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark scout-navbar shadow-sm sticky-top">
+        <div class="container-fluid px-lg-4">
+            <a class="navbar-brand d-flex align-items-center gap-2" href="{{ url_for('dashboard') }}">
+                <span class="scout-badge-icon">
+                    <i class="fa-solid fa-campground"></i>
+                </span>
+                <div>
+                    <span class="fw-bold fs-5 tracking-tight">Scout Sandou2</span>
+                    <span class="d-none d-sm-inline text-light-50 small ms-1">| صندوق الكشاف</span>
+                </div>
+            </a>
+            
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#scoutNav" aria-controls="scoutNav" aria-expanded="false" aria-label="Toggle navigation">
+                <i class="fa-solid fa-bars text-white"></i>
+            </button>
+
+            <div class="collapse navbar-collapse" id="scoutNav">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-3">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ url_for('dashboard') }}">
+                            <i class="fa-solid fa-gauge-high me-1"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('dashboard', preset='this_month') }}">
+                            <i class="fa-solid fa-calendar-check me-1"></i> This Month
+                        </a>
+                    </li>
+                </ul>
+
+                <div class="navbar-actions d-flex align-items-center gap-2 flex-wrap">
+                    <button class="btn btn-scout-accent btn-sm px-3 shadow-sm" data-bs-toggle="modal" data-bs-target="#incomeModal">
+                        <i class="fa-solid fa-arrow-down-left me-1"></i> + Income (وارد)
+                    </button>
+                    <button class="btn btn-outline-danger-scout btn-sm px-3 shadow-sm" data-bs-toggle="modal" data-bs-target="#expenseModal">
+                        <i class="fa-solid fa-arrow-up-right me-1"></i> - Expense (مصروف)
+                    </button>
+                    
+                    <div class="dropdown ms-lg-2">
+                        <button class="btn btn-scout-user btn-sm dropdown-toggle d-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <span class="avatar-circle"><i class="fa-solid fa-user-shield"></i></span>
+                            <span class="d-none d-md-inline text-truncate user-name-max">{{ session.get('user') }}</span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2">
+                            <li class="px-3 py-2 text-muted small border-bottom">
+                                <i class="fa-solid fa-envelope me-1"></i> {{ session.get('user') }}
+                            </li>
+                            <li>
+                                <a class="dropdown-item text-danger py-2" href="{{ url_for('logout') }}">
+                                    <i class="fa-solid fa-right-from-bracket me-2"></i> Sign Out
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+    {% endif %}
+
+    <div class="container-fluid px-lg-4 mt-2 d-flex justify-content-end language-switch" aria-label="Language">
+        <a class="btn btn-sm {% if language == 'en' %}btn-dark{% else %}btn-outline-secondary{% endif %}"
+           href="{{ url_for('set_language', language='en', next=request.full_path.rstrip('?')) }}"
+           lang="en" dir="ltr">English</a>
+        <a class="btn btn-sm {% if language == 'ar' %}btn-dark{% else %}btn-outline-secondary{% endif %}"
+           href="{{ url_for('set_language', language='ar', next=request.full_path.rstrip('?')) }}"
+           lang="{{ 'ar' if language == 'ar' else 'en' }}"
+           dir="{{ 'rtl' if language == 'ar' else 'ltr' }}">{{ 'العربية' if language == 'ar' else 'Arabic' }}</a>
+    </div>
+
+    <!-- Flash Messages Container -->
+    <div class="container-fluid px-lg-4 mt-3">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show shadow-sm d-flex align-items-center" role="alert">
+                        <div class="me-2">
+                            {% if category == 'success' %}
+                                <i class="fa-solid fa-circle-check text-success fs-5"></i>
+                            {% elif category == 'danger' %}
+                                <i class="fa-solid fa-circle-exclamation text-danger fs-5"></i>
+                            {% elif category == 'warning' %}
+                                <i class="fa-solid fa-triangle-exclamation text-warning fs-5"></i>
+                            {% else %}
+                                <i class="fa-solid fa-circle-info text-info fs-5"></i>
+                            {% endif %}
+                        </div>
+                        <div class="flex-grow-1">{{ message }}</div>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- Main Content -->
+    <main class="main-wrapper py-3">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer mt-auto py-3 bg-white border-top text-center text-muted small">
+        <div class="container">
+            <span>⚜️ Scout Sandou2 Finance Manager &bull; Designed for Troop Administration &bull; 2026</span>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/i18n.js') }}"></script>
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

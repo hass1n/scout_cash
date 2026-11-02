@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block title %}Sign In - Scout Sandou2 Finance{% endblock %}
+
+{% block content %}
+<div class="login-page">
+    <div class="login-card card border-0 shadow-lg rounded-4 overflow-hidden">
+        <div class="login-header text-center p-4 p-md-5 text-white">
+            <div class="scout-emblem-wrapper mx-auto mb-3 shadow">
+                <i class="fa-solid fa-compass scout-emblem-icon"></i>
+            </div>
+            <h2 class="fw-bold mb-1">Scout Sandou2</h2>
+            <p class="text-white-50 mb-0">صندوق الكشاف &bull; Money Management</p>
+        </div>
+
+        <div class="card-body p-4 p-md-5 bg-white">
+            <div class="text-center mb-4">
+                <span class="badge login-badge px-3 py-2 rounded-pill">
+                    <i class="fa-solid fa-lock me-1"></i> Restricted Troop Access
+                </span>
+            </div>
+
+            <form action="{{ url_for('login') }}" method="POST" autocomplete="on">
+                <div class="mb-4">
+                    <label for="email" class="visually-hidden">Username</label>
+                    <div class="input-group login-input-group">
+                        <span class="input-group-text">
+                            <i class="fa-regular fa-user"></i>
+                        </span>
+                        <input type="email"
+                               class="form-control"
+                               id="email"
+                               name="email"
+                               required
+                               autocomplete="username"
+                               placeholder="Username">
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label for="password" class="visually-hidden">Password</label>
+                    <div class="input-group login-input-group">
+                        <span class="input-group-text">
+                            <i class="fa-solid fa-lock"></i>
+                        </span>
+                        <input type="password"
+                               class="form-control"
+                               id="password"
+                               name="password"
+                               required
+                               autocomplete="current-password"
+                               placeholder="Password">
+                        <button class="btn login-password-toggle" type="button" id="togglePassword" aria-label="Show password">
+                            <i class="fa-regular fa-eye" id="eyeIcon"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="d-grid mb-4">
+                    <button type="submit" class="btn login-submit-btn py-3 fw-semibold shadow-sm">
+                        <i class="fa-solid fa-right-to-bracket me-2"></i> Sign In to Sandou2
+                    </button>
+                </div>
+
+                <div class="text-center pt-3 border-top">
+                    <p class="text-muted small mb-0">
+                        <i class="fa-solid fa-shield-halved me-1"></i>
+                        Troop Treasury Security &bull; "كن مستعداً"
+                    </p>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    const toggleBtn = document.getElementById('togglePassword');
+    const pwdInput = document.getElementById('password');
+    const eyeIcon = document.getElementById('eyeIcon');
+
+    if (toggleBtn && pwdInput) {
+        toggleBtn.addEventListener('click', function() {
+            const isPassword = pwdInput.getAttribute('type') === 'password';
+            pwdInput.setAttribute('type', isPassword ? 'text' : 'password');
+            toggleBtn.setAttribute('aria-label', window.scoutTranslate(isPassword ? 'Hide password' : 'Show password'));
+            eyeIcon.classList.toggle('fa-eye');
+            eyeIcon.classList.toggle('fa-eye-slash');
+        });
+    }
+</script>
+{% endblock %}
