@@ -195,6 +195,21 @@
         'Admin': ['Admin', 'مسؤول'],
         'User': ['User', 'مستخدم'],
         'Approved': ['Approved', 'مقبول'],
+        'Edit user': ['Edit user', 'تعديل المستخدم'],
+        'Remove user': ['Remove user', 'إزالة المستخدم'],
+        'Edit User': ['Edit user', 'تعديل المستخدم'],
+        'Their transactions stay with them if you change the email.':
+            ['Their transactions stay with them if you change the email.', 'تبقى معاملاته معه إذا غيّرت البريد الإلكتروني.'],
+        'New password': ['New password', 'كلمة مرور جديدة'],
+        'Leave empty to keep the current password.': ['Leave empty to keep the current password.', 'اتركها فارغة للإبقاء على كلمة المرور الحالية.'],
+        'Save Changes': ['Save changes', 'حفظ التغييرات'],
+        'Remove User?': ['Remove user?', 'إزالة المستخدم؟'],
+        'Their account and all their data will be permanently deleted. This cannot be undone.':
+            ['Their account and all their data will be permanently deleted. This cannot be undone.', 'سيتم حذف حسابه وجميع بياناته نهائياً. لا يمكن التراجع عن ذلك.'],
+        'Transactions to delete:': ['Transactions to delete:', 'المعاملات التي ستُحذف:'],
+        'Remove': ['Remove', 'إزالة'],
+        'Your account is no longer active. Please contact the admin.':
+            ['Your account is no longer active. Please contact the admin.', 'حسابك لم يعد فعّالاً. يرجى التواصل مع المسؤول.'],
         'Declined': ['Declined', 'مرفوض']
     };
 
@@ -237,6 +252,10 @@
         }
         match = trimmed.match(/^User (\S+) was created\. They can sign in now\.$/);
         if (match) return language === 'ar' ? `تم إنشاء المستخدم ${match[1]}. يمكنه تسجيل الدخول الآن.` : trimmed;
+        match = trimmed.match(/^User (\S+) was updated\.$/);
+        if (match) return language === 'ar' ? `تم تحديث المستخدم ${match[1]}.` : trimmed;
+        match = trimmed.match(/^User (\S+) and all their data were removed\.$/);
+        if (match) return language === 'ar' ? `تمت إزالة المستخدم ${match[1]} وجميع بياناته.` : trimmed;
         match = trimmed.match(/^(\S+@\S+) was (approved|declined)\.$/);
         if (match) {
             if (language !== 'ar') return trimmed;

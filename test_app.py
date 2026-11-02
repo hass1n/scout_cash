@@ -442,6 +442,102 @@ class SeparateTreasuriesTestCase(unittest.TestCase):
         with self.assertRaises(ValueError):
             database.get_wallet_balance(owner='')
 
+    # --- Admin: remove and edit users -------------------------------------
+
+    def user_id(self, email):
+        return database.get_user_by_email(email)['id']
+
+    def test_admin_removes_user_and_all_their_data(self):
+        database.add_transaction('income', 300, 'USD', 'Ali dues', owner='ali@example.com')
+        database.add_transaction('expense', 20, 'USD', 'Ali rope', owner='ali@example.com')
+        database.add_transaction('income', 75, 'USD', 'Rami dues', owner='rami@example.com')
+        database.register_device('ali-phone', 'ali@example.com')
+
+        # Ali is signed in on another device
+        ali_client = app.test_client()
+        ali_client.post('/login', data={'email': 'ali@example.com', 'password': 'secret1'})
+        self.assertEqual(ali_client.get('/').status_code, 200)
+
+        self.sign_in_as(AUTHORIZED_EMAIL, AUTHORIZED_PASSWORD)
+        res = self.client.get('/users')
+        self.assertIn(b'data-count="2"', res.data)
+        res = self.client.post(f"/users/{self.user_id('ali@example.com')}/remove", follow_redirects=True)
+        self.assertIn(b'User ali@example.com and all their data were removed.', res.data)
+
+        self.assertIsNone(database.get_user_by_email('ali@example.com'))
+        self.assertEqual(database.get_transactions(owner='ali@example.com'), [])
+        self.assertEqual(database.get_devices('ali@example.com'), [])
+        self.assertEqual(len(database.get_transactions(owner='rami@example.com')), 1)
+
+        # Ali's open session ends on the next click, and Ali can no longer sign in
+        res = ali_client.get('/', follow_redirects=True)
+        self.assertIn(b'Your account is no longer active', res.data)
+        res = ali_client.post('/login', data={'email': 'ali@example.com', 'password': 'secret1'}, follow_redirects=True)
+        self.assertIn(b'Invalid email or password', res.data)
+
+    def test_admin_edits_user_details_and_data_follows_new_email(self):
+        database.add_transaction('income', 75, 'USD', 'Rami dues', owner='rami@example.com')
+        database.register_device('rami-phone', 'rami@example.com')
+        rami_client = app.test_client()
+        rami_client.post('/login', data={'email': 'rami@example.com', 'password': 'secret1'})
+
+        self.sign_in_as(AUTHORIZED_EMAIL, AUTHORIZED_PASSWORD)
+        rami_id = self.user_id('rami@example.com')
+        res = self.client.post(f'/users/{rami_id}/update', data={
+            'name': 'Leader Rami', 'email': 'Rami.New@Example.com', 'password': ''
+        }, follow_redirects=True)
+        self.assertIn(b'User rami.new@example.com was updated.', res.data)
+
+        user = database.get_user(rami_id)
+        self.assertEqual((user['name'], user['email']), ('Leader Rami', 'rami.new@example.com'))
+        self.assertEqual(len(database.get_transactions(owner='rami.new@example.com')), 1)
+        self.assertEqual(database.get_devices('rami.new@example.com')[0]['token'], 'rami-phone')
+
+        # The old sign-in no longer works; the new email with the unchanged password does
+        self.assertIn(b'no longer active', rami_client.get('/', follow_redirects=True).data)
+        res = rami_client.post('/login', data={'email': 'rami.new@example.com', 'password': 'secret1'}, follow_redirects=True)
+        self.assertIn(b'Rami dues', res.data)
+
+        # Setting a new password replaces the old one
+        self.client.post(f'/users/{rami_id}/update', data={
+            'name': 'Leader Rami', 'email': 'rami.new@example.com', 'password': 'newpass9'})
+        fresh = app.test_client()
+        res = fresh.post('/login', data={'email': 'rami.new@example.com', 'password': 'secret1'}, follow_redirects=True)
+        self.assertIn(b'Invalid email or password', res.data)
+        res = fresh.post('/login', data={'email': 'rami.new@example.com', 'password': 'newpass9'}, follow_redirects=True)
+        self.assertIn(b'Rami dues', res.data)
+
+    def test_edit_user_validation(self):
+        self.sign_in_as(AUTHORIZED_EMAIL, AUTHORIZED_PASSWORD)
+        rami_id = self.user_id('rami@example.com')
+        for data, message in [
+            ({'name': 'R', 'email': 'ali@example.com'}, b'already exists'),
+            ({'name': 'R', 'email': AUTHORIZED_EMAIL}, b'already exists'),
+            ({'name': 'R', 'email': 'bad-email'}, b'valid email'),
+            ({'name': '', 'email': 'rami@example.com'}, b'fill in all fields'),
+            ({'name': 'R', 'email': 'rami@example.com', 'password': '123'}, b'at least 6 characters'),
+        ]:
+            res = self.client.post(f'/users/{rami_id}/update', data=data, follow_redirects=True)
+            self.assertIn(message, res.data)
+        self.assertEqual(database.get_user(rami_id)['email'], 'rami@example.com')
+
+        # Saving with the same email is fine
+        res = self.client.post(f'/users/{rami_id}/update', data={'name': 'Rami B', 'email': 'rami@example.com'}, follow_redirects=True)
+        self.assertIn(b'was updated', res.data)
+
+    def test_only_admin_can_remove_or_edit_users(self):
+        database.add_transaction('income', 300, 'USD', 'Ali dues', owner='ali@example.com')
+        self.sign_in_as('rami@example.com')
+        ali_id = self.user_id('ali@example.com')
+        self.assertEqual(self.client.post(f'/users/{ali_id}/remove').status_code, 403)
+        self.assertEqual(self.client.post(f'/users/{ali_id}/update', data={
+            'name': 'x', 'email': 'x@example.com'}).status_code, 403)
+        self.assertIsNotNone(database.get_user_by_email('ali@example.com'))
+        self.assertEqual(len(database.get_transactions(owner='ali@example.com')), 1)
+
+        self.sign_in_as(AUTHORIZED_EMAIL, AUTHORIZED_PASSWORD)
+        self.assertEqual(self.client.post('/users/9999/remove').status_code, 404)
+
 
 if __name__ == '__main__':
     unittest.main()

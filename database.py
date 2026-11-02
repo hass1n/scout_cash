@@ -389,6 +389,62 @@ def count_pending_users(db_path=None):
     conn.close()
     return int(row['n'])
 
+def update_user(id_, name, email, password_hash=None, db_path=None):
+    """
+    Changes a user's name, email and (optionally) password. When the email changes,
+    their transactions and linked phones move with it. Returns False if the user is gone.
+    """
+    conn = get_db_connection(db_path)
+    cursor = conn.cursor()
+    _execute(conn, cursor, 'SELECT email FROM users WHERE id = ?', (id_,))
+    row = cursor.fetchone()
+    if not row:
+        conn.close()
+        return False
+    old_email, new_email = row['email'], email.strip().lower()
+
+    if password_hash:
+        _execute(conn, cursor, 'UPDATE users SET name = ?, email = ?, password_hash = ? WHERE id = ?',
+                 (name.strip(), new_email, password_hash, id_))
+    else:
+        _execute(conn, cursor, 'UPDATE users SET name = ?, email = ? WHERE id = ?', (name.strip(), new_email, id_))
+    if new_email != old_email:
+        _execute(conn, cursor, 'UPDATE transactions SET owner = ? WHERE owner = ?', (new_email, old_email))
+        _execute(conn, cursor, 'UPDATE devices SET email = ? WHERE email = ?', (new_email, old_email))
+    conn.commit()
+    conn.close()
+    return True
+
+def delete_user_and_data(id_, db_path=None):
+    """
+    Permanently removes a user together with all their transactions and linked phones.
+    Returns the number of transactions deleted, or None if the user did not exist.
+    """
+    conn = get_db_connection(db_path)
+    cursor = conn.cursor()
+    _execute(conn, cursor, 'SELECT email FROM users WHERE id = ?', (id_,))
+    row = cursor.fetchone()
+    if not row:
+        conn.close()
+        return None
+    email = row['email']
+    _execute(conn, cursor, 'DELETE FROM transactions WHERE owner = ?', (email,))
+    deleted_transactions = cursor.rowcount
+    _execute(conn, cursor, 'DELETE FROM devices WHERE email = ?', (email,))
+    _execute(conn, cursor, 'DELETE FROM users WHERE id = ?', (id_,))
+    conn.commit()
+    conn.close()
+    return deleted_transactions
+
+def count_transactions(owner, db_path=None):
+    owner = _owner_key(owner)
+    conn = get_db_connection(db_path)
+    cursor = conn.cursor()
+    _execute(conn, cursor, 'SELECT COUNT(*) AS n FROM transactions WHERE owner = ?', (owner,))
+    row = cursor.fetchone()
+    conn.close()
+    return int(row['n'])
+
 # ---------------------------------------------------------------------------
 # Devices (push notification tokens from the Android app)
 # ---------------------------------------------------------------------------

@@ -50,6 +50,13 @@ def login_required(f):
         if 'user' not in session:
             flash('Please sign in to access Scout Money Management.', 'warning')
             return redirect(url_for('login'))
+        if not is_admin():
+            # The admin may have removed this account or changed its email since sign-in
+            user = database.get_user_by_email(session['user'])
+            if not user or user['status'] != 'approved':
+                session.pop('user', None)
+                flash('Your account is no longer active. Please contact the admin.', 'warning')
+                return redirect(url_for('login'))
         return f(*args, **kwargs)
     return decorated_function
 
@@ -176,15 +183,15 @@ def signup():
     return render_template('signup.html', form=form)
 
 
-def validate_new_account(name, email, password, confirm=None):
+def validate_new_account(name, email, password, confirm=None, password_required=True):
     """Returns an error message, or None if the details are valid."""
-    if not name or not email or not password:
+    if not name or not email or (password_required and not password):
         return 'Please fill in all fields.'
     if '@' not in email or '.' not in email.split('@')[-1]:
         return 'Please enter a valid email address.'
     if email == AUTHORIZED_EMAIL.lower():
         return 'An account or request with this email already exists.'
-    if len(password) < MIN_PASSWORD_LENGTH:
+    if password and len(password) < MIN_PASSWORD_LENGTH:
         return f'Password must be at least {MIN_PASSWORD_LENGTH} characters.'
     if confirm is not None and password != confirm:
         return 'Passwords do not match.'
@@ -204,10 +211,14 @@ def register_device():
 
 def render_users_page(form=None):
     all_users = database.get_users()
+    others = [u for u in all_users if u['status'] != 'pending']
+    for u in others:
+        # Shown in the "Remove user" confirmation
+        u['transaction_count'] = database.count_transactions(u['email'])
     return render_template(
         'users.html',
         pending=[u for u in all_users if u['status'] == 'pending'],
-        others=[u for u in all_users if u['status'] != 'pending'],
+        others=others,
         form=form or {'name': '', 'email': ''},
         push_configured=push.is_configured(),
     )
@@ -235,6 +246,39 @@ def create_user():
 
     database.create_user(name, email, generate_password_hash(password), status='approved')
     flash(f'User {email} was created. They can sign in now.', 'success')
+    return redirect(url_for('users'))
+
+
+@app.route('/users/<int:user_id>/update', methods=['POST'])
+@admin_required
+def update_user(user_id):
+    user = database.get_user(user_id)
+    if not user:
+        abort(404)
+    name = request.form.get('name', '').strip()
+    email = request.form.get('email', '').strip().lower()
+    password = request.form.get('password', '')  # blank keeps the current password
+
+    error = validate_new_account(name, email, password, password_required=False)
+    if not error and email != user['email'] and database.get_user_by_email(email):
+        error = 'An account or request with this email already exists.'
+    if error:
+        flash(error, 'danger')
+        return redirect(url_for('users'))
+
+    database.update_user(user_id, name, email, generate_password_hash(password) if password else None)
+    flash(f'User {email} was updated.', 'success')
+    return redirect(url_for('users'))
+
+
+@app.route('/users/<int:user_id>/remove', methods=['POST'])
+@admin_required
+def remove_user(user_id):
+    user = database.get_user(user_id)
+    if not user:
+        abort(404)
+    database.delete_user_and_data(user_id)
+    flash(f'User {user["email"]} and all their data were removed.', 'info')
     return redirect(url_for('users'))
 
 
