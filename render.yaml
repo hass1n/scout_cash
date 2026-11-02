@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: scout-cash
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.10
+      - key: DATABASE_URL
+        fromDatabase:
+          name: scout-cash-db
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ADMIN_EMAIL
+        value: sahmarany.hassan11@gmail.com
+      # Entered in the Render dashboard when the Blueprint is created; never committed
+      - key: ADMIN_PASSWORD
+        sync: false
+
+databases:
+  - name: scout-cash-db
+    plan: free

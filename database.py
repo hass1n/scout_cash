@@ -4,21 +4,37 @@ from datetime import datetime
 
 DEFAULT_DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'scout_finance.db')
 
+# When set (e.g. on Render), PostgreSQL is used instead of the local SQLite file.
+DATABASE_URL = os.environ.get('DATABASE_URL')
+
 def get_db_connection(db_path=None):
+    if DATABASE_URL and not db_path:
+        import psycopg
+        from psycopg.rows import dict_row
+        return psycopg.connect(DATABASE_URL, row_factory=dict_row)
     path = db_path or DEFAULT_DB_PATH
     conn = sqlite3.connect(path)
     conn.row_factory = sqlite3.Row
     return conn
 
+def _is_postgres(conn):
+    return not isinstance(conn, sqlite3.Connection)
+
+def _execute(conn, cursor, query, params=()):
+    """Run a query written with SQLite '?' placeholders on either backend."""
+    if _is_postgres(conn):
+        query = query.replace('?', '%s')
+    cursor.execute(query, params)
+
 def init_db(db_path=None):
-    path = db_path or DEFAULT_DB_PATH
-    conn = get_db_connection(path)
+    conn = get_db_connection(db_path)
     cursor = conn.cursor()
-    cursor.execute('''
+    pg = _is_postgres(conn)
+    cursor.execute(f'''
         CREATE TABLE IF NOT EXISTS transactions (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id {'SERIAL PRIMARY KEY' if pg else 'INTEGER PRIMARY KEY AUTOINCREMENT'},
             type TEXT NOT NULL CHECK(type IN ('income', 'expense')),
-            amount REAL NOT NULL,
+            amount {'DOUBLE PRECISION' if pg else 'REAL'} NOT NULL,
             currency TEXT NOT NULL CHECK(currency IN ('USD', 'LBP')),
             party_or_purpose TEXT NOT NULL,
             category TEXT DEFAULT 'General',
@@ -38,12 +54,15 @@ def add_transaction(type_, amount, currency, party_or_purpose, category='General
         date = datetime.now().strftime('%Y-%m-%d')
     conn = get_db_connection(db_path)
     cursor = conn.cursor()
-    cursor.execute('''
+    query = '''
         INSERT INTO transactions (type, amount, currency, party_or_purpose, category, notes, date)
         VALUES (?, ?, ?, ?, ?, ?, ?)
-    ''', (type_, float(amount), currency.upper(), party_or_purpose.strip(), category.strip() or 'General', (notes or '').strip(), date))
+    '''
+    if _is_postgres(conn):
+        query += ' RETURNING id'
+    _execute(conn, cursor, query, (type_, float(amount), currency.upper(), party_or_purpose.strip(), category.strip() or 'General', (notes or '').strip(), date))
+    new_id = cursor.fetchone()['id'] if _is_postgres(conn) else cursor.lastrowid
     conn.commit()
-    new_id = cursor.lastrowid
     conn.close()
     return new_id
 
@@ -52,7 +71,7 @@ def update_transaction(id_, type_, amount, currency, party_or_purpose, category=
         date = datetime.now().strftime('%Y-%m-%d')
     conn = get_db_connection(db_path)
     cursor = conn.cursor()
-    cursor.execute('''
+    _execute(conn, cursor, '''
         UPDATE transactions
         SET type = ?, amount = ?, currency = ?, party_or_purpose = ?, category = ?, notes = ?, date = ?
         WHERE id = ?
@@ -65,7 +84,7 @@ def update_transaction(id_, type_, amount, currency, party_or_purpose, category=
 def delete_transaction(id_, db_path=None):
     conn = get_db_connection(db_path)
     cursor = conn.cursor()
-    cursor.execute('DELETE FROM transactions WHERE id = ?', (id_,))
+    _execute(conn, cursor, 'DELETE FROM transactions WHERE id = ?', (id_,))
     conn.commit()
     affected = cursor.rowcount
     conn.close()
@@ -74,7 +93,7 @@ def delete_transaction(id_, db_path=None):
 def get_transaction(id_, db_path=None):
     conn = get_db_connection(db_path)
     cursor = conn.cursor()
-    cursor.execute('SELECT * FROM transactions WHERE id = ?', (id_,))
+    _execute(conn, cursor, 'SELECT * FROM transactions WHERE id = ?', (id_,))
     row = cursor.fetchone()
     conn.close()
     return dict(row) if row else None
@@ -98,12 +117,14 @@ def get_transactions(start_date=None, end_date=None, currency=None, type_=None, 
         query += ' AND type = ?'
         params.append(type_.lower())
     if search:
-        query += ' AND (party_or_purpose LIKE ? OR notes LIKE ? OR category LIKE ?)'
+        # SQLite LIKE is case-insensitive; ILIKE keeps that behaviour on PostgreSQL
+        like = 'ILIKE' if _is_postgres(conn) else 'LIKE'
+        query += f' AND (party_or_purpose {like} ? OR notes {like} ? OR category {like} ?)'
         wildcard = f'%{search.strip()}%'
         params.extend([wildcard, wildcard, wildcard])
 
     query += ' ORDER BY date DESC, id DESC'
-    cursor.execute(query, params)
+    _execute(conn, cursor, query, params)
     rows = cursor.fetchall()
     conn.close()
     return [dict(r) for r in rows]
@@ -177,7 +198,7 @@ def get_summary_stats(start_date=None, end_date=None, db_path=None):
         params.append(end_date)
     query += ' GROUP BY currency, type'
 
-    cursor.execute(query, params)
+    _execute(conn, cursor, query, params)
     rows = cursor.fetchall()
     conn.close()
 

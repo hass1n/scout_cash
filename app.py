@@ -15,9 +15,9 @@ import database
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'scout_sandou2_secret_key_2026_!@#')
 
-# Predefined authorized credentials
-AUTHORIZED_EMAIL = 'sahmarany.hassan11@gmail.com'
-AUTHORIZED_PASSWORD = '1234'
+# Authorized credentials (override with environment variables in production)
+AUTHORIZED_EMAIL = os.environ.get('ADMIN_EMAIL', 'sahmarany.hassan11@gmail.com')
+AUTHORIZED_PASSWORD = os.environ.get('ADMIN_PASSWORD', '1234')
 
 # Initialize database on module load
 database.init_db()
