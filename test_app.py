@@ -3,7 +3,10 @@ import os
 import tempfile
 from datetime import date
 
+from werkzeug.security import generate_password_hash
+
 import database
+import push
 from app import app, AUTHORIZED_EMAIL, AUTHORIZED_PASSWORD
 
 class ScoutFinanceTestCase(unittest.TestCase):
@@ -191,6 +194,161 @@ class ScoutFinanceTestCase(unittest.TestCase):
         response = self.client.get('/')
         self.assertIn(b'<html lang="en" dir="ltr">', response.data)
         self.assertIn(b'bootstrap.min.css', response.data)
+
+
+class UserAccountsTestCase(unittest.TestCase):
+    """Sign-up requests, admin approval, roles and push notifications."""
+
+    def setUp(self):
+        self.db_fd, self.db_path = tempfile.mkstemp(suffix='.db')
+        self.orig_db_path = database.DEFAULT_DB_PATH
+        database.DEFAULT_DB_PATH = self.db_path
+        database.init_db()
+
+        app.config['TESTING'] = True
+        self.client = app.test_client()
+
+        # Record push notifications instead of sending them
+        self.pushes = []
+        self.orig_notify = push.notify_email
+        push.notify_email = lambda email, messages: self.pushes.append((email, messages)) or 1
+
+    def tearDown(self):
+        push.notify_email = self.orig_notify
+        database.DEFAULT_DB_PATH = self.orig_db_path
+        os.close(self.db_fd)
+        if os.path.exists(self.db_path):
+            os.remove(self.db_path)
+
+    def login(self, email, password):
+        return self.client.post('/login', data={'email': email, 'password': password}, follow_redirects=True)
+
+    def signup(self, email='scout@example.com', password='secret1', confirm=None, push_token=''):
+        return self.client.post('/signup', data={
+            'name': 'Ali Scout',
+            'email': email,
+            'password': password,
+            'confirm_password': password if confirm is None else confirm,
+            'push_token': push_token,
+        }, follow_redirects=True)
+
+    def decide(self, email, decision):
+        user = database.get_user_by_email(email)
+        return self.client.post(f"/users/{user['id']}/{decision}", follow_redirects=True)
+
+    def test_signup_waits_for_approval_and_notifies_on_approve(self):
+        res = self.signup(email='Scout@Example.com', push_token='phone-token-1')
+        self.assertIn(b'Your request was sent', res.data)
+        self.assertEqual(database.get_user_by_email('scout@example.com')['status'], 'pending')
+        self.assertEqual(database.get_devices('scout@example.com')[0]['token'], 'phone-token-1')
+        # The admin is told about the new request
+        self.assertEqual(self.pushes[-1][0], AUTHORIZED_EMAIL)
+
+        # Pending users cannot sign in
+        res = self.login('scout@example.com', 'secret1')
+        self.assertIn(b'still waiting for admin approval', res.data)
+        self.assertNotIn(b'Scout Treasury Overview', res.data)
+
+        # Admin approves -> the applicant gets a push notification
+        self.login(AUTHORIZED_EMAIL, AUTHORIZED_PASSWORD)
+        res = self.client.get('/users')
+        self.assertIn(b'scout@example.com', res.data)
+        res = self.decide('scout@example.com', 'approve')
+        self.assertIn(b'scout@example.com was approved.', res.data)
+        self.assertEqual(self.pushes[-1][0], 'scout@example.com')
+        self.assertIn('approved', self.pushes[-1][1]['en'][1])
+
+        # A second decision on the same request is ignored
+        res = self.decide('scout@example.com', 'decline')
+        self.assertIn(b'already handled', res.data)
+        self.assertEqual(database.get_user_by_email('scout@example.com')['status'], 'approved')
+
+        # The approved user can sign in and use the dashboard, but not admin pages
+        self.client.get('/logout')
+        res = self.login('scout@example.com', 'secret1')
+        self.assertIn(b'Scout Treasury Overview', res.data)
+        self.assertNotIn(b'href="/users"', res.data)
+        self.assertEqual(self.client.get('/users').status_code, 403)
+        res = self.client.post('/transaction/add', data={
+            'type': 'expense', 'amount': '20', 'currency': 'USD',
+            'party_or_purpose': 'Rope', 'category': 'Gear', 'date': '2026-11-02'
+        }, follow_redirects=True)
+        self.assertIn(b'Rope', res.data)
+
+    def test_declined_request_is_notified_and_blocks_sign_in(self):
+        self.signup()
+        self.login(AUTHORIZED_EMAIL, AUTHORIZED_PASSWORD)
+        self.decide('scout@example.com', 'decline')
+        self.assertEqual(self.pushes[-1][0], 'scout@example.com')
+        self.assertIn('declined', self.pushes[-1][1]['en'][1])
+
+        self.client.get('/logout')
+        res = self.login('scout@example.com', 'secret1')
+        self.assertIn(b'was declined by the admin', res.data)
+
+        # A declined person may send a new request
+        res = self.signup(password='newpass1')
+        self.assertIn(b'Your request was sent', res.data)
+        self.assertEqual(database.get_user_by_email('scout@example.com')['status'], 'pending')
+
+    def test_signup_validation(self):
+        self.assertIn(b'Passwords do not match', self.signup(confirm='other12').data)
+        self.assertIn(b'at least 6 characters', self.signup(password='123').data)
+        self.assertIn(b'valid email', self.signup(email='not-an-email').data)
+        self.assertIn(b'already exists', self.signup(email=AUTHORIZED_EMAIL).data)
+        self.signup()
+        self.assertIn(b'already exists', self.signup().data)
+        self.assertEqual(len(database.get_users()), 1)
+
+    def test_wrong_password_does_not_reveal_request_status(self):
+        self.signup()
+        res = self.login('scout@example.com', 'wrong-password')
+        self.assertIn(b'Invalid email or password', res.data)
+        self.assertNotIn(b'waiting for admin approval', res.data)
+
+    def test_admin_creates_user_who_can_sign_in_immediately(self):
+        self.login(AUTHORIZED_EMAIL, AUTHORIZED_PASSWORD)
+        res = self.client.post('/users/create', data={
+            'name': 'Leader Rami', 'email': 'rami@example.com', 'password': 'camp2026'
+        }, follow_redirects=True)
+        self.assertIn(b'User rami@example.com was created', res.data)
+
+        res = self.client.post('/users/create', data={
+            'name': 'Dup', 'email': 'rami@example.com', 'password': 'camp2026'
+        }, follow_redirects=True)
+        self.assertIn(b'already exists', res.data)
+
+        self.client.get('/logout')
+        res = self.login('rami@example.com', 'camp2026')
+        self.assertIn(b'Scout Treasury Overview', res.data)
+
+    def test_only_admin_can_manage_users(self):
+        database.create_user('U', 'user@example.com', generate_password_hash('secret1'), status='approved')
+        self.login('user@example.com', 'secret1')
+        self.assertEqual(self.client.get('/users').status_code, 403)
+        self.assertEqual(self.client.post('/users/create', data={
+            'name': 'X', 'email': 'x@example.com', 'password': 'secret1'}).status_code, 403)
+        pending_id = database.create_user('P', 'p@example.com', generate_password_hash('secret1'))
+        self.assertEqual(self.client.post(f'/users/{pending_id}/approve').status_code, 403)
+        self.assertEqual(database.get_user(pending_id)['status'], 'pending')
+
+        # Signed-out visitors are sent to the login page
+        self.client.get('/logout')
+        self.assertIn('/login', self.client.get('/users').headers['Location'])
+
+    def test_device_registration_and_logout_unlinks_phone(self):
+        self.login(AUTHORIZED_EMAIL, AUTHORIZED_PASSWORD)
+        self.assertEqual(self.client.post('/device/register', data={'token': 'admin-phone'}).status_code, 204)
+        self.assertEqual(database.get_devices(AUTHORIZED_EMAIL)[0]['token'], 'admin-phone')
+        self.client.get('/logout?token=admin-phone')
+        self.assertEqual(database.get_devices(AUTHORIZED_EMAIL), [])
+        # Registering requires being signed in
+        self.assertEqual(self.client.post('/device/register', data={'token': 't'}).status_code, 302)
+
+    def test_push_is_skipped_without_firebase_credentials(self):
+        os.environ.pop('FIREBASE_CREDENTIALS', None)
+        database.register_device('t1', 'scout@example.com')
+        self.assertEqual(self.orig_notify('scout@example.com', {'en': ('t', 'b')}), 0)
 
 
 if __name__ == '__main__':

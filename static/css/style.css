@@ -231,6 +231,17 @@ body {
     font-size: 1.05rem;
     transition: background-color 0.2s ease, transform 0.2s ease;
 }
+.min-w-0 {
+    min-width: 0;
+}
+.auth-switch-link {
+    color: #c2410c;
+    text-decoration: none;
+}
+.auth-switch-link:hover {
+    color: #9a3412;
+    text-decoration: underline;
+}
 .login-submit-btn:hover {
     background-color: #ea580c;
     border-color: #ea580c;

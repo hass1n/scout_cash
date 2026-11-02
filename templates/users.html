@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+
+{% block title %}Users &bull; Scout Sandou2 Finance{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-lg-4 users-page">
+
+    <div class="mb-4">
+        <h2 class="fw-bold mb-1 text-dark">👥 Users &amp; Access Requests</h2>
+        <p class="text-muted mb-0 small">Approve or decline sign-up requests, and create accounts for troop members.</p>
+    </div>
+
+    {% if not push_configured %}
+    <div class="alert alert-light border small d-flex align-items-center gap-2">
+        <i class="fa-solid fa-bell-slash text-muted"></i>
+        <span>Phone notifications are not set up yet, so people are not notified of your decision.</span>
+    </div>
+    {% endif %}
+
+    <div class="row g-4">
+        <!-- Pending requests -->
+        <div class="col-lg-7">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-header bg-white border-0 pt-4 px-4 d-flex align-items-center gap-2">
+                    <h5 class="fw-bold mb-0">Pending Requests</h5>
+                    <span class="badge rounded-pill bg-warning text-dark">{{ pending|length }}</span>
+                </div>
+                <div class="card-body px-0 pb-2">
+                    {% if pending %}
+                    <ul class="list-group list-group-flush">
+                        {% for u in pending %}
+                        <li class="list-group-item px-4 py-3 d-flex flex-column flex-sm-row align-items-sm-center gap-2">
+                            <div class="flex-grow-1 min-w-0">
+                                <div class="fw-semibold">{{ u.name }}</div>
+                                <div class="small text-break">{{ u.email }}</div>
+                                <div class="small text-muted">
+                                    <i class="fa-regular fa-clock me-1"></i>{{ (u.created_at|string)[:16] }}
+                                </div>
+                            </div>
+                            <div class="d-flex gap-2 flex-shrink-0">
+                                <form action="{{ url_for('decide_user', user_id=u.id, decision='approve') }}" method="POST">
+                                    <button type="submit" class="btn btn-sm btn-success">
+                                        <i class="fa-solid fa-check me-1"></i> Approve
+                                    </button>
+                                </form>
+                                <form action="{{ url_for('decide_user', user_id=u.id, decision='decline') }}" method="POST">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                                        <i class="fa-solid fa-xmark me-1"></i> Decline
+                                    </button>
+                                </form>
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    <p class="text-muted text-center py-4 mb-0">
+                        <i class="fa-regular fa-circle-check me-1"></i> No pending requests
+                    </p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Create user -->
+        <div class="col-lg-5">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-header bg-white border-0 pt-4 px-4">
+                    <h5 class="fw-bold mb-0">Create a User</h5>
+                    <p class="text-muted small mb-0">The account is approved right away.</p>
+                </div>
+                <div class="card-body px-4 pb-4">
+                    <form action="{{ url_for('create_user') }}" method="POST" autocomplete="off">
+                        <div class="mb-3">
+                            <label for="new_name" class="form-label small fw-semibold">Full name</label>
+                            <input type="text" class="form-control" id="new_name" name="name" required maxlength="100" value="{{ form.name }}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="new_email" class="form-label small fw-semibold">Email</label>
+                            <input type="email" class="form-control" id="new_email" name="email" required maxlength="254" value="{{ form.email }}">
+                        </div>
+                        <div class="mb-4">
+                            <label for="new_password" class="form-label small fw-semibold">Password</label>
+                            <input type="password" class="form-control" id="new_password" name="password" required minlength="6" autocomplete="new-password">
+                            <div class="form-text">At least 6 characters. Share it with the person privately.</div>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fa-solid fa-user-plus me-1"></i> Create User
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- All users -->
+        <div class="col-12">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-header bg-white border-0 pt-4 px-4">
+                    <h5 class="fw-bold mb-0">All Users</h5>
+                </div>
+                <div class="card-body px-0 pb-2">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item px-4 py-3 d-flex align-items-center gap-3">
+                            <div class="flex-grow-1 min-w-0">
+                                <div class="fw-semibold">Admin</div>
+                                <div class="small text-muted text-break">{{ session.get('user') }}</div>
+                            </div>
+                            <div class="d-flex flex-wrap justify-content-end gap-1 flex-shrink-0">
+                                <span class="badge bg-dark">Admin</span>
+                                <span class="badge bg-success-subtle text-success border border-success-subtle">Approved</span>
+                            </div>
+                        </li>
+                        {% for u in others %}
+                        <li class="list-group-item px-4 py-3 d-flex align-items-center gap-3">
+                            <div class="flex-grow-1 min-w-0">
+                                <div class="fw-semibold">{{ u.name }}</div>
+                                <div class="small text-muted text-break">{{ u.email }}</div>
+                            </div>
+                            <div class="d-flex flex-wrap justify-content-end gap-1 flex-shrink-0">
+                                <span class="badge bg-light text-secondary border">User</span>
+                                {% if u.status == 'approved' %}
+                                <span class="badge bg-success-subtle text-success border border-success-subtle">Approved</span>
+                                {% else %}
+                                <span class="badge bg-danger-subtle text-danger border border-danger-subtle">Declined</span>
+                                {% endif %}
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

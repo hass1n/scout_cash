@@ -46,6 +46,29 @@ def init_db(db_path=None):
     cursor.execute('CREATE INDEX IF NOT EXISTS idx_transactions_date ON transactions(date)')
     cursor.execute('CREATE INDEX IF NOT EXISTS idx_transactions_type ON transactions(type)')
     cursor.execute('CREATE INDEX IF NOT EXISTS idx_transactions_currency ON transactions(currency)')
+    cursor.execute(f'''
+        CREATE TABLE IF NOT EXISTS users (
+            id {'SERIAL PRIMARY KEY' if pg else 'INTEGER PRIMARY KEY AUTOINCREMENT'},
+            name TEXT NOT NULL,
+            email TEXT NOT NULL UNIQUE,
+            password_hash TEXT NOT NULL,
+            role TEXT NOT NULL DEFAULT 'user' CHECK(role IN ('admin', 'user')),
+            status TEXT NOT NULL DEFAULT 'pending' CHECK(status IN ('pending', 'approved', 'declined')),
+            language TEXT NOT NULL DEFAULT 'en',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            decided_at TIMESTAMP
+        )
+    ''')
+    # Phones (Android app installs) that receive push notifications for an email address
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS devices (
+            token TEXT PRIMARY KEY,
+            email TEXT NOT NULL,
+            language TEXT NOT NULL DEFAULT 'en',
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
+    cursor.execute('CREATE INDEX IF NOT EXISTS idx_devices_email ON devices(email)')
     conn.commit()
     conn.close()
 
@@ -245,3 +268,123 @@ def get_summary_stats(start_date=None, end_date=None, db_path=None):
     stats['total_expense_count'] = stats['usd_expense_count'] + stats['lbp_expense_count']
     stats['total_count'] = stats['total_income_count'] + stats['total_expense_count']
     return stats
+
+# ---------------------------------------------------------------------------
+# Users (sign-up requests and approved accounts)
+# ---------------------------------------------------------------------------
+
+def get_user_by_email(email, db_path=None):
+    conn = get_db_connection(db_path)
+    cursor = conn.cursor()
+    _execute(conn, cursor, 'SELECT * FROM users WHERE email = ?', ((email or '').strip().lower(),))
+    row = cursor.fetchone()
+    conn.close()
+    return dict(row) if row else None
+
+def get_user(id_, db_path=None):
+    conn = get_db_connection(db_path)
+    cursor = conn.cursor()
+    _execute(conn, cursor, 'SELECT * FROM users WHERE id = ?', (id_,))
+    row = cursor.fetchone()
+    conn.close()
+    return dict(row) if row else None
+
+def create_user(name, email, password_hash, status='pending', role='user', language='en', db_path=None):
+    """Creates a user (or sign-up request). Returns the new id."""
+    conn = get_db_connection(db_path)
+    cursor = conn.cursor()
+    query = '''
+        INSERT INTO users (name, email, password_hash, role, status, language, decided_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+    '''
+    if _is_postgres(conn):
+        query += ' RETURNING id'
+    decided_at = None if status == 'pending' else datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    _execute(conn, cursor, query, (name.strip(), email.strip().lower(), password_hash, role, status, language, decided_at))
+    new_id = cursor.fetchone()['id'] if _is_postgres(conn) else cursor.lastrowid
+    conn.commit()
+    conn.close()
+    return new_id
+
+def reopen_request(id_, name, password_hash, language='en', db_path=None):
+    """Turns a declined sign-up back into a pending request with new details."""
+    conn = get_db_connection(db_path)
+    cursor = conn.cursor()
+    _execute(conn, cursor, '''
+        UPDATE users
+        SET name = ?, password_hash = ?, language = ?, status = 'pending', decided_at = NULL, created_at = CURRENT_TIMESTAMP
+        WHERE id = ? AND status = 'declined'
+    ''', (name.strip(), password_hash, language, id_))
+    conn.commit()
+    affected = cursor.rowcount
+    conn.close()
+    return affected > 0
+
+def set_user_status(id_, status, db_path=None):
+    """Approves or declines a pending request. Returns False if it was not pending."""
+    conn = get_db_connection(db_path)
+    cursor = conn.cursor()
+    _execute(conn, cursor, '''
+        UPDATE users SET status = ?, decided_at = ?
+        WHERE id = ? AND status = 'pending'
+    ''', (status, datetime.now().strftime('%Y-%m-%d %H:%M:%S'), id_))
+    conn.commit()
+    affected = cursor.rowcount
+    conn.close()
+    return affected > 0
+
+def get_users(status=None, db_path=None):
+    conn = get_db_connection(db_path)
+    cursor = conn.cursor()
+    query = 'SELECT * FROM users'
+    params = []
+    if status:
+        query += ' WHERE status = ?'
+        params.append(status)
+    query += ' ORDER BY created_at DESC, id DESC'
+    _execute(conn, cursor, query, params)
+    rows = cursor.fetchall()
+    conn.close()
+    return [dict(r) for r in rows]
+
+def count_pending_users(db_path=None):
+    conn = get_db_connection(db_path)
+    cursor = conn.cursor()
+    _execute(conn, cursor, "SELECT COUNT(*) AS n FROM users WHERE status = 'pending'")
+    row = cursor.fetchone()
+    conn.close()
+    return int(row['n'])
+
+# ---------------------------------------------------------------------------
+# Devices (push notification tokens from the Android app)
+# ---------------------------------------------------------------------------
+
+def register_device(token, email, language='en', db_path=None):
+    conn = get_db_connection(db_path)
+    cursor = conn.cursor()
+    _execute(conn, cursor, '''
+        INSERT INTO devices (token, email, language, updated_at)
+        VALUES (?, ?, ?, CURRENT_TIMESTAMP)
+        ON CONFLICT (token) DO UPDATE
+        SET email = excluded.email, language = excluded.language, updated_at = CURRENT_TIMESTAMP
+    ''', (token, email.strip().lower(), language))
+    conn.commit()
+    conn.close()
+
+def get_devices(email, db_path=None):
+    conn = get_db_connection(db_path)
+    cursor = conn.cursor()
+    _execute(conn, cursor, 'SELECT * FROM devices WHERE email = ?', ((email or '').strip().lower(),))
+    rows = cursor.fetchall()
+    conn.close()
+    return [dict(r) for r in rows]
+
+def delete_device(token, email=None, db_path=None):
+    conn = get_db_connection(db_path)
+    cursor = conn.cursor()
+    if email is None:
+        _execute(conn, cursor, 'DELETE FROM devices WHERE token = ?', (token,))
+    else:
+        _execute(conn, cursor, 'DELETE FROM devices WHERE token = ? AND email = ?', (token, email.strip().lower()))
+    conn.commit()
+    conn.close()
