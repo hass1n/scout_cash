@@ -43,7 +43,7 @@
             <div class="collapse navbar-collapse" id="scoutNav">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-3">
                     <li class="nav-item">
-                        <a class="nav-link active" href="{{ url_for('dashboard') }}">
+                        <a class="nav-link {% if request.endpoint == 'dashboard' %}active{% endif %}" href="{{ url_for('dashboard') }}">
                             <i class="fa-solid fa-gauge-high me-1"></i> Dashboard
                         </a>
                     </li>
@@ -52,27 +52,42 @@
                             <i class="fa-solid fa-calendar-check me-1"></i> This Month
                         </a>
                     </li>
+                    {% if is_admin %}
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'users' %}active{% endif %}" href="{{ url_for('users') }}">
+                            <i class="fa-solid fa-users me-1"></i> Users
+                            {% if pending_requests_count %}
+                            <span class="badge rounded-pill bg-warning text-dark ms-1">{{ pending_requests_count }}</span>
+                            {% endif %}
+                        </a>
+                    </li>
+                    {% endif %}
                 </ul>
 
                 <div class="navbar-actions d-flex align-items-center gap-2 flex-wrap">
+                    {% if request.endpoint == 'dashboard' %}
                     <button class="btn btn-scout-accent btn-sm px-3 shadow-sm" data-bs-toggle="modal" data-bs-target="#incomeModal">
                         <i class="fa-solid fa-arrow-down-left me-1"></i> + Income (وارد)
                     </button>
                     <button class="btn btn-outline-danger-scout btn-sm px-3 shadow-sm" data-bs-toggle="modal" data-bs-target="#expenseModal">
                         <i class="fa-solid fa-arrow-up-right me-1"></i> - Expense (مصروف)
                     </button>
-                    
+                    {% endif %}
+
                     <div class="dropdown ms-lg-2">
                         <button class="btn btn-scout-user btn-sm dropdown-toggle d-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <span class="avatar-circle"><i class="fa-solid fa-user-shield"></i></span>
+                            <span class="avatar-circle"><i class="fa-solid {% if is_admin %}fa-user-shield{% else %}fa-user{% endif %}"></i></span>
                             <span class="d-none d-md-inline text-truncate user-name-max">{{ session.get('user') }}</span>
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2">
                             <li class="px-3 py-2 text-muted small border-bottom">
                                 <i class="fa-solid fa-envelope me-1"></i> {{ session.get('user') }}
+                                <div class="mt-1">
+                                    <span class="badge {% if is_admin %}bg-dark{% else %}bg-light text-secondary border{% endif %}">{{ 'Admin' if is_admin else 'User' }}</span>
+                                </div>
                             </li>
                             <li>
-                                <a class="dropdown-item text-danger py-2" href="{{ url_for('logout') }}">
+                                <a class="dropdown-item text-danger py-2" id="logoutLink" href="{{ url_for('logout') }}">
                                     <i class="fa-solid fa-right-from-bracket me-2"></i> Sign Out
                                 </a>
                             </li>
@@ -136,6 +151,32 @@
     <!-- Custom JS -->
     <script src="{{ url_for('static', filename='js/app.js') }}"></script>
     <script src="{{ url_for('static', filename='js/i18n.js') }}"></script>
+    <script>
+        // Inside the Android app: link this phone's push token to the account (see AndroidApp bridge).
+        (function () {
+            function usePushToken(token) {
+                if (!token) return;
+                document.querySelectorAll('input[name="push_token"]').forEach(function (input) { input.value = token; });
+                var logout = document.getElementById('logoutLink');
+                if (logout) logout.href = '{{ url_for("logout") }}?token=' + encodeURIComponent(token);
+                {% if session.get('user') %}
+                var key = 'pushTokenFor:' + {{ session.get('user')|tojson }};
+                try { if (sessionStorage.getItem(key) === token) return; } catch (e) {}
+                fetch('{{ url_for("register_device") }}', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: 'token=' + encodeURIComponent(token)
+                }).then(function (response) {
+                    if (response.ok) { try { sessionStorage.setItem(key, token); } catch (e) {} }
+                });
+                {% endif %}
+            }
+            window.onPushToken = usePushToken;
+            if (window.AndroidApp && window.AndroidApp.getPushToken) {
+                usePushToken(window.AndroidApp.getPushToken());
+            }
+        })();
+    </script>
     {% block extra_scripts %}{% endblock %}
 </body>
 </html>

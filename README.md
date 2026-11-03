@@ -77,6 +77,18 @@ Access is strictly restricted to the authorized leadership account:
 
 ---
 
+## ☁️ Deploying on Render
+
+The repo includes a `render.yaml` Blueprint that creates a web service plus a PostgreSQL database.
+
+1. In the Render dashboard choose **New → Blueprint** and connect this repository.
+2. When prompted, enter a strong `ADMIN_PASSWORD` (the `1234` default only applies locally).
+3. Render sets `DATABASE_URL` and `SECRET_KEY` automatically.
+
+When `DATABASE_URL` is set the app stores data in PostgreSQL; otherwise it uses the local `scout_finance.db` SQLite file.
+
+---
+
 ## 🧪 Running Tests
 To run the automated test suite:
 ```bash

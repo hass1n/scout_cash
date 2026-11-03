@@ -82,6 +82,33 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    // USER EDIT MODAL HANDLER (admin Users page)
+    const userEditModal = document.getElementById('userEditModal');
+    if (userEditModal) {
+        userEditModal.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+            if (!button) return;
+
+            document.getElementById('userEditForm').action = `/users/${button.getAttribute('data-id')}/update`;
+            document.getElementById('userEditName').value = button.getAttribute('data-name');
+            document.getElementById('userEditEmail').value = button.getAttribute('data-email');
+            document.getElementById('userEditPassword').value = '';
+        });
+    }
+
+    // USER REMOVE MODAL HANDLER (admin Users page)
+    const userRemoveModal = document.getElementById('userRemoveModal');
+    if (userRemoveModal) {
+        userRemoveModal.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+            if (!button) return;
+
+            document.getElementById('userRemoveForm').action = `/users/${button.getAttribute('data-id')}/remove`;
+            document.getElementById('userRemoveEmail').textContent = button.getAttribute('data-email');
+            document.getElementById('userRemoveCount').textContent = button.getAttribute('data-count');
+        });
+    }
+
     // AUTO DISMISS ALERTS
     const alerts = document.querySelectorAll('.alert-dismissible');
     alerts.forEach(function (alert) {

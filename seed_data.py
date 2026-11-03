@@ -2,14 +2,19 @@
 Optional sample data seeder for Scout Sandou2 Treasury.
 Run this script anytime to insert initial representative data for testing.
 """
+import os
 from datetime import date
 import database
 
+# Sample data goes into the admin's own treasury
+OWNER = os.environ.get('ADMIN_EMAIL', 'sahmarany.hassan11@gmail.com')
+
 def seed():
     database.init_db()
-    
+    database.claim_unowned_transactions(OWNER)
+
     # Check if records already exist
-    existing = database.get_transactions()
+    existing = database.get_transactions(owner=OWNER)
     if existing:
         print(f"Database already contains {len(existing)} transactions. Skipping seed to prevent duplicates.")
         return
@@ -94,7 +99,7 @@ def seed():
     ]
 
     for t in sample_transactions:
-        database.add_transaction(**t)
+        database.add_transaction(**t, owner=OWNER)
 
     print(f"Successfully seeded {len(sample_transactions)} sample transactions into scout_finance.db!")
 

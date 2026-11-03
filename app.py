@@ -9,17 +9,39 @@ from flask import (
     Flask, render_template, request, redirect,
     url_for, session, flash, Response, jsonify, abort
 )
+from werkzeug.security import generate_password_hash, check_password_hash
+
 import database
+import push
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'scout_sandou2_secret_key_2026_!@#')
 
-# Predefined authorized credentials
-AUTHORIZED_EMAIL = 'sahmarany.hassan11@gmail.com'
-AUTHORIZED_PASSWORD = '1234'
+# Admin credentials (override with environment variables in production).
+# The admin can do everything a user can, plus approve sign-ups and create users.
+AUTHORIZED_EMAIL = os.environ.get('ADMIN_EMAIL', 'sahmarany.hassan11@gmail.com')
+AUTHORIZED_PASSWORD = os.environ.get('ADMIN_PASSWORD', '1234')
 
-# Initialize database on module load
+MIN_PASSWORD_LENGTH = 6
+
+# Initialize database on module load. Transactions recorded before each user had
+# a separate treasury belong to the admin, who entered them.
 database.init_db()
+database.claim_unowned_transactions(AUTHORIZED_EMAIL)
+
+
+def is_admin():
+    return session.get('user', '').lower() == AUTHORIZED_EMAIL.lower()
+
+
+def current_owner():
+    """The signed-in user's email: every transaction query is limited to it."""
+    return session['user'].lower()
+
+
+def current_language():
+    language = session.get('language', 'en')
+    return language if language in ('en', 'ar') else 'en'
 
 
 def login_required(f):
@@ -28,14 +50,39 @@ def login_required(f):
         if 'user' not in session:
             flash('Please sign in to access Scout Money Management.', 'warning')
             return redirect(url_for('login'))
+        if not is_admin():
+            # The admin may have removed this account or changed its email since sign-in
+            user = database.get_user_by_email(session['user'])
+            if not user or user['status'] != 'approved':
+                session.pop('user', None)
+                flash('Your account is no longer active. Please contact the admin.', 'warning')
+                return redirect(url_for('login'))
+        return f(*args, **kwargs)
+    return decorated_function
+
+
+def admin_required(f):
+    @wraps(f)
+    @login_required
+    def decorated_function(*args, **kwargs):
+        if not is_admin():
+            abort(403)
         return f(*args, **kwargs)
     return decorated_function
 
 
 @app.context_processor
 def inject_language():
-    language = session.get('language', 'en')
-    return {'language': language if language in ('en', 'ar') else 'en'}
+    return {'language': current_language()}
+
+
+@app.context_processor
+def inject_user_role():
+    admin = 'user' in session and is_admin()
+    return {
+        'is_admin': admin,
+        'pending_requests_count': database.count_pending_users() if admin else 0,
+    }
 
 
 @app.template_filter('format_currency')
@@ -74,13 +121,194 @@ def login():
             session['user'] = AUTHORIZED_EMAIL
             flash('أهلاً وسهلاً بك في صندوق فوج الدورة', 'success')
             return redirect(url_for('dashboard'))
+
+        user = database.get_user_by_email(email)
+        if user and check_password_hash(user['password_hash'], password):
+            if user['status'] == 'approved':
+                session['user'] = user['email']
+                flash('أهلاً وسهلاً بك في صندوق فوج الدورة', 'success')
+                return redirect(url_for('dashboard'))
+            if user['status'] == 'pending':
+                flash('Your sign-up request is still waiting for admin approval.', 'warning')
+            else:
+                flash('Your sign-up request was declined by the admin.', 'danger')
         else:
-            flash('Invalid email or password. Access is restricted to authorized account only.', 'danger')
+            flash('Invalid email or password.', 'danger')
 
     if 'user' in session:
         return redirect(url_for('dashboard'))
 
     return render_template('login.html', authorized_email=AUTHORIZED_EMAIL)
+
+
+@app.route('/signup', methods=['GET', 'POST'])
+def signup():
+    if 'user' in session:
+        return redirect(url_for('dashboard'))
+
+    form = {'name': '', 'email': ''}
+    if request.method == 'POST':
+        name = request.form.get('name', '').strip()
+        email = request.form.get('email', '').strip().lower()
+        password = request.form.get('password', '')
+        confirm = request.form.get('confirm_password', '')
+        push_token = request.form.get('push_token', '').strip()
+        form = {'name': name, 'email': email}
+
+        error = validate_new_account(name, email, password, confirm)
+        existing = database.get_user_by_email(email) if not error else None
+        if not error and existing and existing['status'] != 'declined':
+            error = 'An account or request with this email already exists.'
+
+        if error:
+            flash(error, 'danger')
+            return render_template('signup.html', form=form)
+
+        password_hash = generate_password_hash(password)
+        if existing:
+            database.reopen_request(existing['id'], name, password_hash, current_language())
+        else:
+            database.create_user(name, email, password_hash, status='pending', language=current_language())
+
+        if push_token:
+            database.register_device(push_token, email, current_language())
+        push.notify_email(AUTHORIZED_EMAIL, {
+            'en': ('New sign-up request', f'{name} ({email}) wants to join Scout Sandou2.'),
+            'ar': ('طلب تسجيل جديد', f'{name} ({email}) يريد الانضمام إلى صندوق الكشاف.'),
+        })
+
+        flash('Your request was sent. You will be notified when the admin approves or declines it.', 'success')
+        return redirect(url_for('login'))
+
+    return render_template('signup.html', form=form)
+
+
+def validate_new_account(name, email, password, confirm=None, password_required=True):
+    """Returns an error message, or None if the details are valid."""
+    if not name or not email or (password_required and not password):
+        return 'Please fill in all fields.'
+    if '@' not in email or '.' not in email.split('@')[-1]:
+        return 'Please enter a valid email address.'
+    if email == AUTHORIZED_EMAIL.lower():
+        return 'An account or request with this email already exists.'
+    if password and len(password) < MIN_PASSWORD_LENGTH:
+        return f'Password must be at least {MIN_PASSWORD_LENGTH} characters.'
+    if confirm is not None and password != confirm:
+        return 'Passwords do not match.'
+    return None
+
+
+@app.route('/device/register', methods=['POST'])
+@login_required
+def register_device():
+    """Links the Android app's push token to the signed-in account."""
+    token = request.form.get('token', '').strip()
+    if not token or len(token) > 4096:
+        abort(400)
+    database.register_device(token, session['user'], current_language())
+    return '', 204
+
+
+def render_users_page(form=None):
+    all_users = database.get_users()
+    others = [u for u in all_users if u['status'] != 'pending']
+    for u in others:
+        # Shown in the "Remove user" confirmation
+        u['transaction_count'] = database.count_transactions(u['email'])
+    return render_template(
+        'users.html',
+        pending=[u for u in all_users if u['status'] == 'pending'],
+        others=others,
+        form=form or {'name': '', 'email': ''},
+        push_configured=push.is_configured(),
+    )
+
+
+@app.route('/users')
+@admin_required
+def users():
+    return render_users_page()
+
+
+@app.route('/users/create', methods=['POST'])
+@admin_required
+def create_user():
+    name = request.form.get('name', '').strip()
+    email = request.form.get('email', '').strip().lower()
+    password = request.form.get('password', '')
+
+    error = validate_new_account(name, email, password)
+    if not error and database.get_user_by_email(email):
+        error = 'An account or request with this email already exists.'
+    if error:
+        flash(error, 'danger')
+        return render_users_page({'name': name, 'email': email})
+
+    database.create_user(name, email, generate_password_hash(password), status='approved')
+    flash(f'User {email} was created. They can sign in now.', 'success')
+    return redirect(url_for('users'))
+
+
+@app.route('/users/<int:user_id>/update', methods=['POST'])
+@admin_required
+def update_user(user_id):
+    user = database.get_user(user_id)
+    if not user:
+        abort(404)
+    name = request.form.get('name', '').strip()
+    email = request.form.get('email', '').strip().lower()
+    password = request.form.get('password', '')  # blank keeps the current password
+
+    error = validate_new_account(name, email, password, password_required=False)
+    if not error and email != user['email'] and database.get_user_by_email(email):
+        error = 'An account or request with this email already exists.'
+    if error:
+        flash(error, 'danger')
+        return redirect(url_for('users'))
+
+    database.update_user(user_id, name, email, generate_password_hash(password) if password else None)
+    flash(f'User {email} was updated.', 'success')
+    return redirect(url_for('users'))
+
+
+@app.route('/users/<int:user_id>/remove', methods=['POST'])
+@admin_required
+def remove_user(user_id):
+    user = database.get_user(user_id)
+    if not user:
+        abort(404)
+    database.delete_user_and_data(user_id)
+    flash(f'User {user["email"]} and all their data were removed.', 'info')
+    return redirect(url_for('users'))
+
+
+@app.route('/users/<int:user_id>/<decision>', methods=['POST'])
+@admin_required
+def decide_user(user_id, decision):
+    if decision not in ('approve', 'decline'):
+        abort(404)
+    user = database.get_user(user_id)
+    if not user:
+        abort(404)
+
+    status = 'approved' if decision == 'approve' else 'declined'
+    if not database.set_user_status(user_id, status):
+        flash('This request was already handled.', 'info')
+        return redirect(url_for('users'))
+
+    if status == 'approved':
+        push.notify_email(user['email'], {
+            'en': ('Request approved ✅', 'Your Scout Sandou2 account was approved. You can sign in now.'),
+            'ar': ('تمت الموافقة ✅', 'تمت الموافقة على حسابك في صندوق الكشاف. يمكنك تسجيل الدخول الآن.'),
+        })
+        flash(f'{user["email"]} was approved.', 'success')
+    else:
+        push.notify_email(user['email'], {
+            'en': ('Request declined', 'Your Scout Sandou2 sign-up request was declined.'),
+            'ar': ('تم رفض الطلب', 'تم رفض طلب تسجيلك في صندوق الكشاف.'),
+        })
+        flash(f'{user["email"]} was declined.', 'info')
+    return redirect(url_for('users'))
 
 
 @app.route('/language/<language>')
@@ -97,6 +325,10 @@ def set_language(language):
 
 @app.route('/logout')
 def logout():
+    # Stop sending this phone notifications meant for the account that signed out
+    token = request.args.get('token', '').strip()
+    if token and 'user' in session:
+        database.delete_device(token, session['user'])
     session.pop('user', None)
     flash('You have been logged out safely.', 'info')
     return redirect(url_for('login'))
@@ -134,12 +366,13 @@ def dashboard():
         end_date = ''
 
     # Overall Total Wallet Balance (all time)
-    wallet = database.get_wallet_balance()
+    wallet = database.get_wallet_balance(owner=current_owner())
 
     # Period Statistics (filtered by date range)
     period_stats = database.get_summary_stats(
         start_date=start_date or None,
-        end_date=end_date or None
+        end_date=end_date or None,
+        owner=current_owner()
     )
 
     # All filtered transactions
@@ -148,7 +381,8 @@ def dashboard():
         end_date=end_date or None,
         currency=currency if currency in ('USD', 'LBP') else None,
         type_=trans_type if trans_type in ('income', 'expense') else None,
-        search=search or None
+        search=search or None,
+        owner=current_owner()
     )
 
     # Split for quick inspection: Incomes ("From Who") vs Expenses ("For What")
@@ -215,7 +449,8 @@ def add_transaction():
         party_or_purpose=party_or_purpose,
         category=category or 'General',
         notes=notes,
-        date=t_date
+        date=t_date,
+        owner=current_owner()
     )
 
     t_label = 'Income (وارد)' if trans_type == 'income' else 'Expense (مصروف)'
@@ -230,7 +465,7 @@ def add_transaction():
 @app.route('/transaction/edit/<int:trans_id>', methods=['POST'])
 @login_required
 def edit_transaction(trans_id):
-    existing = database.get_transaction(trans_id)
+    existing = database.get_transaction(trans_id, owner=current_owner())
     if not existing:
         flash('Transaction not found.', 'danger')
         return redirect(request.referrer or url_for('dashboard'))
@@ -265,7 +500,8 @@ def edit_transaction(trans_id):
         party_or_purpose=party_or_purpose,
         category=category or 'General',
         notes=notes,
-        date=t_date
+        date=t_date,
+        owner=current_owner()
     )
 
     flash('Transaction updated successfully!', 'success')
@@ -275,11 +511,11 @@ def edit_transaction(trans_id):
 @app.route('/transaction/delete/<int:trans_id>', methods=['POST'])
 @login_required
 def delete_transaction(trans_id):
-    existing = database.get_transaction(trans_id)
+    existing = database.get_transaction(trans_id, owner=current_owner())
     if not existing:
         flash('Transaction not found.', 'danger')
     else:
-        database.delete_transaction(trans_id)
+        database.delete_transaction(trans_id, owner=current_owner())
         flash('Transaction deleted successfully.', 'info')
     return redirect(request.referrer or url_for('dashboard'))
 
@@ -298,7 +534,8 @@ def export_csv():
         end_date=end_date or None,
         currency=currency if currency in ('USD', 'LBP') else None,
         type_=trans_type if trans_type in ('income', 'expense') else None,
-        search=search or None
+        search=search or None,
+        owner=current_owner()
     )
 
     si = io.StringIO()
