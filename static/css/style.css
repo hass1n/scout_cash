@@ -540,6 +540,10 @@ body {
     }
 }
 
+.print-only {
+    display: none !important;
+}
+
 /* PRINT STYLES */
 @media print {
     @page {
@@ -597,6 +601,21 @@ body {
 
     .period-summary-actions {
         display: none !important;
+    }
+
+    .screen-only {
+        display: none !important;
+    }
+
+    .print-only {
+        display: inline !important;
+    }
+
+    .print-date {
+        display: block !important;
+        margin-bottom: 0.75rem;
+        color: #000 !important;
+        font-weight: 600;
     }
 
     .period-summary-banner .bg-white,

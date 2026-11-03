@@ -195,6 +195,7 @@
 
             <!-- PERIOD SUMMARY HIGHLIGHT CARD -->
             <div id="period-summary" class="period-summary-banner mt-4 p-3 rounded-3 border">
+                <div class="print-only print-date">Printed on: {{ today_date }}</div>
                 <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-3">
                     <div class="d-flex align-items-center gap-2">
                         <span class="badge bg-dark px-2 py-1">
@@ -240,9 +241,13 @@
                     <!-- Income LBP -->
                     <div class="col-6 col-md-3">
                         <div class="p-2 rounded bg-white border">
-                            <div class="text-muted extra-small">Income (ل.ل) &bull; {{ period_stats.lbp_income_count }} tx</div>
+                            <div class="text-muted extra-small">
+                                <span class="screen-only">Income (ل.ل)</span><span class="print-only">Income (LBP)</span>
+                                &bull; {{ period_stats.lbp_income_count }} tx
+                            </div>
                             <div class="fw-bold text-success fs-5">
-                                {{ period_stats.lbp_income | format_currency('LBP') }}
+                                <span class="screen-only">{{ period_stats.lbp_income | format_currency('LBP') }}</span>
+                                <span class="print-only">{{ period_stats.lbp_income | format_num }} LBP</span>
                             </div>
                         </div>
                     </div>
@@ -258,9 +263,13 @@
                     <!-- Expense LBP -->
                     <div class="col-6 col-md-3">
                         <div class="p-2 rounded bg-white border">
-                            <div class="text-muted extra-small">Expenses (ل.ل) &bull; {{ period_stats.lbp_expense_count }} tx</div>
+                            <div class="text-muted extra-small">
+                                <span class="screen-only">Expenses (ل.ل)</span><span class="print-only">Expenses (LBP)</span>
+                                &bull; {{ period_stats.lbp_expense_count }} tx
+                            </div>
                             <div class="fw-bold text-danger fs-5">
-                                {{ period_stats.lbp_expense | format_currency('LBP') }}
+                                <span class="screen-only">{{ period_stats.lbp_expense | format_currency('LBP') }}</span>
+                                <span class="print-only">{{ period_stats.lbp_expense | format_num }} LBP</span>
                             </div>
                         </div>
                     </div>
@@ -281,10 +290,12 @@
                     <div class="col-12 col-md-6">
                         <div class="py-2 px-3 rounded bg-light border d-flex justify-content-between align-items-center">
                             <span class="small fw-semibold text-secondary">
-                                Net Period Result (ل.ل):
+                                <span class="screen-only">Net Period Result (ل.ل):</span>
+                                <span class="print-only">Net Period Result (LBP):</span>
                             </span>
                             <span class="fw-bold {% if period_stats.lbp_net >= 0 %}text-primary{% else %}text-danger{% endif %}">
-                                {{ period_stats.lbp_net | format_currency('LBP') }}
+                                <span class="screen-only">{{ period_stats.lbp_net | format_currency('LBP') }}</span>
+                                <span class="print-only">{{ period_stats.lbp_net | format_num }} LBP</span>
                             </span>
                         </div>
                     </div>

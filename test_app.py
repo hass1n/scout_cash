@@ -169,6 +169,8 @@ class ScoutFinanceTestCase(unittest.TestCase):
         self.assertIn(b'>#1</td>', res.data)
         self.assertIn(b'id="period-summary"', res.data)
         self.assertIn(b'Summary for Selected Period', res.data)
+        self.assertIn(b'Printed on:', res.data)
+        self.assertIn(b'Income (LBP)', res.data)
         self.assertIn(b'Net Period Result ($):', res.data)
 
         # Expense transactions also display their unique ID in the dashboard.
