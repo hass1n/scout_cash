@@ -560,11 +560,11 @@ body {
         padding: 0 !important;
     }
 
-    .dashboard-page > :not(.transactions-card) {
+    .dashboard-page > :not(.period-filter-card) {
         display: none !important;
     }
 
-    .transactions-card {
+    .period-filter-card {
         display: block !important;
         margin: 0 !important;
         overflow: visible !important;
@@ -572,50 +572,36 @@ body {
         box-shadow: none !important;
     }
 
-    .transactions-card > :not(.card-body) {
+    .period-filter-card > :not(.card-body) {
         display: none !important;
     }
 
-    .transactions-card > .card-body,
-    .transactions-card .tab-content,
-    .transactions-card #all-tab-pane,
-    .transactions-card .printable-transactions {
+    .period-filter-card > .card-body {
         display: block !important;
+        padding: 0 !important;
     }
 
-    .transactions-card .tab-content > :not(#all-tab-pane) {
+    .period-filter-card .card-body > :not(.period-summary-banner) {
         display: none !important;
     }
 
-    .printable-transactions {
-        position: static !important;
-        width: 100% !important;
-        overflow: visible !important;
-    }
-
-    .printable-transactions .transaction-table {
-        width: 100% !important;
-        min-width: 0 !important;
-        border-collapse: collapse !important;
-    }
-
-    .printable-transactions .transaction-table th,
-    .printable-transactions .transaction-table td {
-        padding: 0.35rem !important;
+    .period-summary-banner {
+        display: block !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        border: 0 !important;
         color: #000 !important;
-        background: #fff !important;
-        border: 1px solid #999 !important;
-        white-space: normal !important;
-        overflow: visible !important;
-        text-overflow: clip !important;
-    }
-
-    .printable-transactions .transaction-table tr {
         break-inside: avoid;
         page-break-inside: avoid;
     }
 
-    .printable-transactions .print-hide {
+    .period-summary-actions {
         display: none !important;
+    }
+
+    .period-summary-banner .bg-white,
+    .period-summary-banner .bg-light {
+        color: #000 !important;
+        background: #fff !important;
     }
 }
