@@ -535,18 +535,30 @@ body {
         background-color: #fff !important;
     }
     .scout-navbar,
-    .btn,
-    .nav-pills,
-    .modal,
+    .language-switch,
+    .flash-messages,
+    footer,
+    .dashboard-page > :not(.period-filter-card),
+    .period-filter-card > .card-header,
     form#filterForm,
-    footer {
+    .period-summary-actions,
+    .modal {
         display: none !important;
     }
-    .card {
-        border: 1px solid #ccc !important;
+    .main-wrapper {
+        padding-top: 0 !important;
+        padding-bottom: 0 !important;
+    }
+    .dashboard-page {
+        padding-right: 0 !important;
+        padding-left: 0 !important;
+    }
+    .period-filter-card {
+        border: 0 !important;
         box-shadow: none !important;
     }
-    .wallet-card {
+    .period-summary-banner {
+        margin-top: 0 !important;
         break-inside: avoid;
     }
 }

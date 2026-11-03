@@ -113,7 +113,7 @@
     </div>
 
     <!-- FILTER & REPORTING SECTION -->
-    <div class="card border-0 shadow-sm rounded-4 mb-4">
+    <div class="card border-0 shadow-sm rounded-4 mb-4 period-filter-card">
         <div class="card-header bg-white border-0 pt-4 pb-2 px-4 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
             <div>
                 <h5 class="fw-bold mb-0 text-dark">
@@ -194,7 +194,7 @@
             </form>
 
             <!-- PERIOD SUMMARY HIGHLIGHT CARD -->
-            <div class="period-summary-banner mt-4 p-3 rounded-3 border">
+            <div id="period-summary" class="period-summary-banner mt-4 p-3 rounded-3 border">
                 <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-3">
                     <div class="d-flex align-items-center gap-2">
                         <span class="badge bg-dark px-2 py-1">
@@ -215,7 +215,7 @@
                     </div>
 
                     <!-- Export & Print Actions -->
-                    <div class="d-flex gap-2">
+                    <div class="d-flex gap-2 period-summary-actions">
                         <a href="{{ url_for('export_csv', start_date=start_date, end_date=end_date, currency=currency, type=trans_type, search=search) }}" 
                            class="btn btn-outline-success btn-sm bg-white shadow-sm">
                             <i class="fa-solid fa-file-excel me-1"></i> Export CSV
@@ -325,7 +325,8 @@
                         <table class="table table-hover align-middle mb-0 transaction-table">
                             <thead class="table-light text-muted small">
                                 <tr>
-                                    <th class="ps-4">Date</th>
+                                    <th class="ps-4">ID</th>
+                                    <th class="ps-2">Date</th>
                                     <th>Type</th>
                                     <th>Party / Purpose</th>
                                     <th>Category</th>
@@ -337,7 +338,8 @@
                             <tbody>
                                 {% for t in transactions %}
                                 <tr>
-                                    <td class="ps-4 text-nowrap">
+                                    <td class="ps-4 text-nowrap fw-semibold">#{{ t.id }}</td>
+                                    <td class="ps-2 text-nowrap">
                                         <i class="fa-regular fa-calendar-days text-muted me-1"></i>
                                         <span class="fw-semibold">{{ t.date }}</span>
                                     </td>
@@ -431,7 +433,8 @@
                         <table class="table table-hover align-middle mb-0">
                             <thead class="table-light text-muted small">
                                 <tr>
-                                    <th class="ps-4">Date</th>
+                                    <th class="ps-4">ID</th>
+                                    <th class="ps-2">Date</th>
                                     <th>From Who (من مين)</th>
                                     <th>Category</th>
                                     <th>Amount</th>
@@ -442,7 +445,8 @@
                             <tbody>
                                 {% for inc in incomes %}
                                 <tr>
-                                    <td class="ps-4 text-nowrap fw-semibold">{{ inc.date }}</td>
+                                    <td class="ps-4 text-nowrap fw-semibold">#{{ inc.id }}</td>
+                                    <td class="ps-2 text-nowrap fw-semibold">{{ inc.date }}</td>
                                     <td>
                                         <div class="fw-bold text-dark fs-6">{{ inc.party_or_purpose }}</div>
                                         <span class="badge bg-light text-muted border extra-small">Source / Contributor</span>
@@ -508,7 +512,8 @@
                         <table class="table table-hover align-middle mb-0">
                             <thead class="table-light text-muted small">
                                 <tr>
-                                    <th class="ps-4">Date</th>
+                                    <th class="ps-4">ID</th>
+                                    <th class="ps-2">Date</th>
                                     <th>For What (السبب / الغاية)</th>
                                     <th>Category</th>
                                     <th>Amount</th>
@@ -519,7 +524,8 @@
                             <tbody>
                                 {% for exp in expenses %}
                                 <tr>
-                                    <td class="ps-4 text-nowrap fw-semibold">{{ exp.date }}</td>
+                                    <td class="ps-4 text-nowrap fw-semibold">#{{ exp.id }}</td>
+                                    <td class="ps-2 text-nowrap fw-semibold">{{ exp.date }}</td>
                                     <td>
                                         <div class="fw-bold text-dark fs-6">{{ exp.party_or_purpose }}</div>
                                         <span class="badge bg-light text-muted border extra-small">Troop Expense / Purchase</span>
