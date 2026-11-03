@@ -167,6 +167,7 @@ class ScoutFinanceTestCase(unittest.TestCase):
         self.assertIn(b'Summer Camp Registration', res.data)
         self.assertIn(b'Transaction #1', res.data)
         self.assertIn(b'>#1</td>', res.data)
+        self.assertIn(b'transactions-card', res.data)
         self.assertIn(b'class="table-responsive printable-transactions"', res.data)
         self.assertIn(b'class="text-end pe-4 print-hide">Actions</th>', res.data)
 
