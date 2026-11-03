@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}Request Access - Scout Sandou2 Finance{% endblock %}
+
+{% block content %}
+<div class="login-page">
+    <div class="login-card card border-0 shadow-lg rounded-4 overflow-hidden">
+        <div class="login-header text-center p-4 p-md-5 text-white">
+            <div class="scout-emblem-wrapper mx-auto mb-3 shadow">
+                <i class="fa-solid fa-user-plus scout-emblem-icon"></i>
+            </div>
+            <h2 class="fw-bold mb-1">Request Access</h2>
+            <p class="text-white-50 mb-0">The admin will approve or decline your request</p>
+        </div>
+
+        <div class="card-body p-4 p-md-5 bg-white">
+            <form action="{{ url_for('signup') }}" method="POST" autocomplete="on">
+                <input type="hidden" name="push_token" value="">
+
+                <div class="mb-3">
+                    <label for="name" class="visually-hidden">Full name</label>
+                    <div class="input-group login-input-group">
+                        <span class="input-group-text"><i class="fa-regular fa-id-card"></i></span>
+                        <input type="text" class="form-control" id="name" name="name" required
+                               maxlength="100" autocomplete="name" placeholder="Full name" value="{{ form.name }}">
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="email" class="visually-hidden">Email</label>
+                    <div class="input-group login-input-group">
+                        <span class="input-group-text"><i class="fa-regular fa-envelope"></i></span>
+                        <input type="email" class="form-control" id="email" name="email" required
+                               maxlength="254" autocomplete="email" placeholder="Email" value="{{ form.email }}">
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="password" class="visually-hidden">Password</label>
+                    <div class="input-group login-input-group">
+                        <span class="input-group-text"><i class="fa-solid fa-lock"></i></span>
+                        <input type="password" class="form-control" id="password" name="password" required
+                               minlength="6" autocomplete="new-password" placeholder="Password (at least 6 characters)">
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label for="confirm_password" class="visually-hidden">Confirm password</label>
+                    <div class="input-group login-input-group">
+                        <span class="input-group-text"><i class="fa-solid fa-lock"></i></span>
+                        <input type="password" class="form-control" id="confirm_password" name="confirm_password" required
+                               minlength="6" autocomplete="new-password" placeholder="Confirm password">
+                    </div>
+                </div>
+
+                <div class="d-grid mb-4">
+                    <button type="submit" class="btn login-submit-btn py-3 fw-semibold shadow-sm">
+                        <i class="fa-solid fa-paper-plane me-2"></i> Send Request
+                    </button>
+                </div>
+
+                <div class="text-center pt-3 border-top">
+                    <p class="text-muted small mb-0">
+                        Already have an account?
+                        <a href="{{ url_for('login') }}" class="fw-semibold auth-switch-link">Sign in</a>
+                    </p>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -142,7 +142,75 @@
         'e.g. Leader Ahmad, Donor Name, Monthly Scout Dues':
             ['e.g. Leader Ahmad, donor name, monthly scout dues', 'مثال: القائد أحمد، اسم المتبرع، اشتراكات الكشافة الشهرية'],
         'e.g. Tent repairs, Bus transport, Food for camp, Uniforms':
-            ['e.g. Tent repairs, bus transport, camp food, uniforms', 'مثال: إصلاح الخيام، نقل بالحافلة، طعام المخيم، الزي الكشفي']
+            ['e.g. Tent repairs, bus transport, camp food, uniforms', 'مثال: إصلاح الخيام، نقل بالحافلة، طعام المخيم، الزي الكشفي'],
+
+        // Sign-up, roles and user management
+        "Don't have an account?": ["Don't have an account?", 'ليس لديك حساب؟'],
+        'Request access': ['Request access', 'اطلب الانضمام'],
+        'Request Access': ['Request Access', 'طلب انضمام'],
+        'Request Access - Scout Sandou2 Finance': ['Request Access - Scout Sandou2 Finance', 'طلب انضمام - الشؤون المالية لصندوق الكشافة'],
+        'The admin will approve or decline your request': ['The admin will approve or decline your request', 'سيوافق المسؤول على طلبك أو يرفضه'],
+        'Full name': ['Full name', 'الاسم الكامل'],
+        'Email': ['Email', 'البريد الإلكتروني'],
+        'Password (at least 6 characters)': ['Password (at least 6 characters)', 'كلمة المرور (6 أحرف على الأقل)'],
+        'Confirm password': ['Confirm password', 'تأكيد كلمة المرور'],
+        'Send Request': ['Send request', 'إرسال الطلب'],
+        'Already have an account?': ['Already have an account?', 'لديك حساب بالفعل؟'],
+        'Sign in': ['Sign in', 'تسجيل الدخول'],
+        'Invalid email or password.': ['Invalid email or password.', 'البريد الإلكتروني أو كلمة المرور غير صحيحة.'],
+        'Your sign-up request is still waiting for admin approval.':
+            ['Your sign-up request is still waiting for admin approval.', 'طلب تسجيلك لا يزال بانتظار موافقة المسؤول.'],
+        'Your sign-up request was declined by the admin.':
+            ['Your sign-up request was declined by the admin.', 'رفض المسؤول طلب تسجيلك.'],
+        'Your request was sent. You will be notified when the admin approves or declines it.':
+            ['Your request was sent. You will be notified when the admin approves or declines it.', 'تم إرسال طلبك. سيصلك إشعار عندما يوافق المسؤول عليه أو يرفضه.'],
+        'Please fill in all fields.': ['Please fill in all fields.', 'يرجى تعبئة جميع الحقول.'],
+        'Please enter a valid email address.': ['Please enter a valid email address.', 'يرجى إدخال بريد إلكتروني صالح.'],
+        'Password must be at least 6 characters.': ['Password must be at least 6 characters.', 'يجب أن تتكون كلمة المرور من 6 أحرف على الأقل.'],
+        'Passwords do not match.': ['Passwords do not match.', 'كلمتا المرور غير متطابقتين.'],
+        'An account or request with this email already exists.':
+            ['An account or request with this email already exists.', 'يوجد حساب أو طلب بهذا البريد الإلكتروني مسبقاً.'],
+        'This request was already handled.': ['This request was already handled.', 'تمت معالجة هذا الطلب مسبقاً.'],
+        'Users': ['Users', 'المستخدمون'],
+        'Users • Scout Sandou2 Finance': ['Users • Scout Sandou2 Finance', 'المستخدمون • الشؤون المالية لصندوق الكشافة'],
+        '👥 Users & Access Requests': ['👥 Users & Access Requests', '👥 المستخدمون وطلبات الانضمام'],
+        'Approve or decline sign-up requests, and create accounts for troop members.':
+            ['Approve or decline sign-up requests, and create accounts for troop members.', 'وافق على طلبات التسجيل أو ارفضها، وأنشئ حسابات لأعضاء المجموعة.'],
+        'Phone notifications are not set up yet, so people are not notified of your decision.':
+            ['Phone notifications are not set up yet, so people are not notified of your decision.', 'إشعارات الهاتف غير مفعّلة بعد، لذلك لن يصل قرارك إلى أصحاب الطلبات.'],
+        'Pending Requests': ['Pending requests', 'الطلبات المعلّقة'],
+        'Name': ['Name', 'الاسم'],
+        'Requested': ['Requested', 'تاريخ الطلب'],
+        'Approve': ['Approve', 'موافقة'],
+        'Decline': ['Decline', 'رفض'],
+        'No pending requests': ['No pending requests', 'لا توجد طلبات معلّقة'],
+        'Create a User': ['Create a user', 'إنشاء مستخدم'],
+        'The account is approved right away.': ['The account is approved right away.', 'يتم اعتماد الحساب مباشرة.'],
+        'At least 6 characters. Share it with the person privately.':
+            ['At least 6 characters. Share it with the person privately.', '6 أحرف على الأقل. شاركها مع الشخص بشكل خاص.'],
+        'Create User': ['Create user', 'إنشاء المستخدم'],
+        'All Users': ['All users', 'جميع المستخدمين'],
+        'Role': ['Role', 'الدور'],
+        'Status': ['Status', 'الحالة'],
+        'Admin': ['Admin', 'مسؤول'],
+        'User': ['User', 'مستخدم'],
+        'Approved': ['Approved', 'مقبول'],
+        'Edit user': ['Edit user', 'تعديل المستخدم'],
+        'Remove user': ['Remove user', 'إزالة المستخدم'],
+        'Edit User': ['Edit user', 'تعديل المستخدم'],
+        'Their transactions stay with them if you change the email.':
+            ['Their transactions stay with them if you change the email.', 'تبقى معاملاته معه إذا غيّرت البريد الإلكتروني.'],
+        'New password': ['New password', 'كلمة مرور جديدة'],
+        'Leave empty to keep the current password.': ['Leave empty to keep the current password.', 'اتركها فارغة للإبقاء على كلمة المرور الحالية.'],
+        'Save Changes': ['Save changes', 'حفظ التغييرات'],
+        'Remove User?': ['Remove user?', 'إزالة المستخدم؟'],
+        'Their account and all their data will be permanently deleted. This cannot be undone.':
+            ['Their account and all their data will be permanently deleted. This cannot be undone.', 'سيتم حذف حسابه وجميع بياناته نهائياً. لا يمكن التراجع عن ذلك.'],
+        'Transactions to delete:': ['Transactions to delete:', 'المعاملات التي ستُحذف:'],
+        'Remove': ['Remove', 'إزالة'],
+        'Your account is no longer active. Please contact the admin.':
+            ['Your account is no longer active. Please contact the admin.', 'حسابك لم يعد فعّالاً. يرجى التواصل مع المسؤول.'],
+        'Declined': ['Declined', 'مرفوض']
     };
 
     const language = document.documentElement.lang === 'ar' ? 'ar' : 'en';
@@ -181,6 +249,17 @@
             const kind = match[1] === 'Income' ? (language === 'ar' ? 'إيرادات' : 'Income') : (language === 'ar' ? 'مصروفات' : 'Expenses');
             const currency = match[2] === '$' ? (language === 'ar' ? 'دولار' : 'USD') : (language === 'ar' ? 'ليرة' : 'LBP');
             return `${kind} (${currency}) • ${match[3]} ${language === 'ar' ? 'معاملة' : 'tx'}`;
+        }
+        match = trimmed.match(/^User (\S+) was created\. They can sign in now\.$/);
+        if (match) return language === 'ar' ? `تم إنشاء المستخدم ${match[1]}. يمكنه تسجيل الدخول الآن.` : trimmed;
+        match = trimmed.match(/^User (\S+) was updated\.$/);
+        if (match) return language === 'ar' ? `تم تحديث المستخدم ${match[1]}.` : trimmed;
+        match = trimmed.match(/^User (\S+) and all their data were removed\.$/);
+        if (match) return language === 'ar' ? `تمت إزالة المستخدم ${match[1]} وجميع بياناته.` : trimmed;
+        match = trimmed.match(/^(\S+@\S+) was (approved|declined)\.$/);
+        if (match) {
+            if (language !== 'ar') return trimmed;
+            return match[2] === 'approved' ? `تمت الموافقة على ${match[1]}.` : `تم رفض ${match[1]}.`;
         }
         match = trimmed.match(/^(Income \(وارد\)|Expense \(مصروف\)) of (.+) added successfully!$/);
         if (match) {
