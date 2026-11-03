@@ -542,34 +542,54 @@ body {
 
 /* PRINT STYLES */
 @media print {
+    @page {
+        margin: 12mm;
+    }
+
     body {
-        background-color: #fff !important;
+        background: #fff !important;
     }
-    .scout-navbar,
-    .language-switch,
-    .flash-messages,
-    footer,
-    .dashboard-page > :not(.period-filter-card),
-    .period-filter-card > .card-header,
-    form#filterForm,
-    .period-summary-actions,
-    .modal {
-        display: none !important;
+
+    body * {
+        visibility: hidden !important;
     }
-    .main-wrapper {
-        padding-top: 0 !important;
-        padding-bottom: 0 !important;
+
+    .printable-transactions,
+    .printable-transactions * {
+        visibility: visible !important;
     }
-    .dashboard-page {
-        padding-right: 0 !important;
-        padding-left: 0 !important;
+
+    .printable-transactions {
+        position: absolute !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100% !important;
+        overflow: visible !important;
     }
-    .period-filter-card {
-        border: 0 !important;
-        box-shadow: none !important;
+
+    .printable-transactions .transaction-table {
+        width: 100% !important;
+        min-width: 0 !important;
+        border-collapse: collapse !important;
     }
-    .period-summary-banner {
-        margin-top: 0 !important;
+
+    .printable-transactions .transaction-table th,
+    .printable-transactions .transaction-table td {
+        padding: 0.35rem !important;
+        color: #000 !important;
+        background: #fff !important;
+        border: 1px solid #999 !important;
+        white-space: normal !important;
+        overflow: visible !important;
+        text-overflow: clip !important;
+    }
+
+    .printable-transactions .transaction-table tr {
         break-inside: avoid;
+        page-break-inside: avoid;
+    }
+
+    .printable-transactions .print-hide {
+        display: none !important;
     }
 }

@@ -321,7 +321,7 @@
                 <!-- TAB 1: ALL TRANSACTIONS -->
                 <div class="tab-pane fade show active" id="all-tab-pane" role="tabpanel" tabindex="0">
                     {% if transactions %}
-                    <div class="table-responsive">
+                    <div class="table-responsive printable-transactions">
                         <table class="table table-hover align-middle mb-0 transaction-table">
                             <thead class="table-light text-muted small">
                                 <tr>
@@ -332,7 +332,7 @@
                                     <th>Category</th>
                                     <th>Amount</th>
                                     <th>Notes</th>
-                                    <th class="text-end pe-4">Actions</th>
+                                    <th class="text-end pe-4 print-hide">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -379,7 +379,7 @@
                                     <td class="small text-muted text-truncate max-notes-col">
                                         {{ t.notes or '-' }}
                                     </td>
-                                    <td class="text-end pe-4 text-nowrap">
+                                    <td class="text-end pe-4 text-nowrap print-hide">
                                         <button class="btn btn-outline-secondary btn-sm rounded-pill btn-edit" 
                                                 data-id="{{ t.id }}"
                                                 data-type="{{ t.type }}"
