@@ -99,7 +99,7 @@
     </nav>
     {% endif %}
 
-    <div class="container-fluid px-lg-4 mt-2 d-flex justify-content-end language-switch" aria-label="Language">
+    <div class="container-fluid px-lg-4 mt-2 d-flex justify-content-end language-switch d-print-none" aria-label="Language">
         <a class="btn btn-sm {% if language == 'en' %}btn-dark{% else %}btn-outline-secondary{% endif %}"
            href="{{ url_for('set_language', language='en', next=request.full_path.rstrip('?')) }}"
            lang="en" dir="ltr">English</a>
@@ -110,7 +110,7 @@
     </div>
 
     <!-- Flash Messages Container -->
-    <div class="container-fluid px-lg-4 mt-3 flash-messages">
+    <div class="container-fluid px-lg-4 mt-3 d-print-none">
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 {% for category, message in messages %}

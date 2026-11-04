@@ -6,7 +6,7 @@
 <div class="container-fluid px-lg-4 dashboard-page">
 
     <!-- Top Greeting & Header Bar -->
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4 d-print-none">
         <div>
             <h2 class="fw-bold mb-1 text-dark d-flex align-items-center gap-2">
                 <span>⚜️ Scout Treasury Overview</span>
@@ -34,7 +34,7 @@
     </div>
 
     <!-- WALLET BALANCES (ALL-TIME CASH BOX) -->
-    <div class="row g-3 mb-4">
+    <div class="row g-3 mb-4 d-print-none">
         <!-- USD Wallet Balance Card -->
         <div class="col-12 col-md-6">
             <div class="card wallet-card wallet-usd border-0 shadow-sm rounded-4 h-100 overflow-hidden">
@@ -113,8 +113,8 @@
     </div>
 
     <!-- FILTER & REPORTING SECTION -->
-    <div class="card border-0 shadow-sm rounded-4 mb-4 period-filter-card">
-        <div class="card-header bg-white border-0 pt-4 pb-2 px-4 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
+    <div class="card border-0 shadow-sm rounded-4 mb-4">
+        <div class="card-header bg-white border-0 pt-4 pb-2 px-4 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 d-print-none">
             <div>
                 <h5 class="fw-bold mb-0 text-dark">
                     <i class="fa-solid fa-filter text-scout me-2"></i> Date Range & Filter Transactions
@@ -193,9 +193,12 @@
                 </div>
             </form>
 
-            <!-- PERIOD SUMMARY HIGHLIGHT CARD -->
-            <div id="period-summary" class="period-summary-banner mt-4 p-3 rounded-3 border">
-                <div class="print-only print-date">Printed on: {{ today_date }}</div>
+            <!-- PERIOD SUMMARY HIGHLIGHT CARD (the only part "Print Report" prints) -->
+            <div class="period-summary-banner mt-4 p-3 rounded-3 border">
+                <div class="d-none d-print-block mb-3">
+                    <h4 class="fw-bold mb-1">⚜️ Scout Sandou2</h4>
+                    <div class="small text-muted">Printed on <strong>{{ today_date }}</strong></div>
+                </div>
                 <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-3">
                     <div class="d-flex align-items-center gap-2">
                         <span class="badge bg-dark px-2 py-1">
@@ -305,7 +308,7 @@
     </div>
 
     <!-- TRANSACTIONS SECTION WITH TABS -->
-    <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-5">
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-5 d-print-none">
         <div class="card-header bg-white border-bottom pt-3 px-4">
             <ul class="nav nav-pills card-header-pills transaction-tabs" id="transactionTabs" role="tablist">
                 <li class="nav-item" role="presentation">
