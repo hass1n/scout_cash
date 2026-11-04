@@ -57,7 +57,13 @@
         'All Time Overview': ['All-time overview', 'نظرة عامة على كل الفترات'],
         'Export CSV': ['Export CSV', 'تصدير CSV'],
         'Print Report': ['Print report', 'طباعة التقرير'],
-        'Printed on': ['Printed on', 'تاريخ الطباعة'],
+        'Printed on:': ['Printed on:', 'تاريخ الطباعة:'],
+        // Period summary labels (screen shows ل.ل, print shows LBP)
+        'Income (ل.ل)': ['Income (LBP)', 'إيرادات (ليرة)'],
+        'Expenses (ل.ل)': ['Expenses (LBP)', 'مصروفات (ليرة)'],
+        'Income (LBP)': ['Income (LBP)', 'إيرادات (ليرة)'],
+        'Expenses (LBP)': ['Expenses (LBP)', 'مصروفات (ليرة)'],
+        'Net Period Result (LBP):': ['Net result (LBP):', 'صافي النتيجة (ليرة):'],
         'Net Period Result ($):': ['Net result (USD):', 'صافي النتيجة (دولار):'],
         'Net Period Result (ل.ل):': ['Net result (LBP):', 'صافي النتيجة (ليرة):'],
         'Date': ['Date', 'التاريخ'],
@@ -245,6 +251,8 @@
         if (match) return language === 'ar' ? `المصروفات (${match[1]})` : `Expenses (${match[1]})`;
         match = trimmed.match(/^• \((\d+) transactions\)$/);
         if (match) return language === 'ar' ? `• (${match[1]} معاملة)` : `• (${match[1]} transactions)`;
+        match = trimmed.match(/^• (\d+) tx$/);
+        if (match) return language === 'ar' ? `• ${match[1]} معاملة` : trimmed;
         match = trimmed.match(/^(Income|Expenses) \((\$|ل\.ل)\) • (\d+) tx$/);
         if (match) {
             const kind = match[1] === 'Income' ? (language === 'ar' ? 'إيرادات' : 'Income') : (language === 'ar' ? 'مصروفات' : 'Expenses');
