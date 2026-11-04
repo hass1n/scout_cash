@@ -4,75 +4,91 @@
 
 {% block content %}
 <div class="login-page">
-    <div class="login-card card border-0 shadow-lg rounded-4 overflow-hidden">
-        <div class="login-header text-center p-4 p-md-5 text-white">
-            <div class="scout-emblem-wrapper mx-auto mb-3 shadow">
-                <i class="fa-solid fa-compass scout-emblem-icon"></i>
-            </div>
-            <h2 class="fw-bold mb-1">Scout Treasury</h2>
-            <p class="text-white-50 mb-0">صندوق الكشاف &bull; Money Management</p>
-        </div>
-
-        <div class="card-body p-4 p-md-5 bg-white">
-            <div class="text-center mb-4">
-                <span class="badge login-badge px-3 py-2 rounded-pill">
-                    <i class="fa-solid fa-lock me-1"></i> Restricted Troop Access
-                </span>
+    <div class="login-card login-stage card border-0 shadow-lg rounded-4 overflow-hidden" id="loginStage">
+        <section class="login-form-panel" id="loginFormPanel" aria-labelledby="loginTitle">
+            <div class="login-header text-center p-4 p-md-5 text-white">
+                <div class="scout-emblem-wrapper mx-auto mb-3 shadow" aria-hidden="true">
+                    <span class="scout-emblem-icon">⚜️</span>
+                </div>
+                <h2 class="fw-bold mb-1" id="loginTitle">Scout Treasury</h2>
+                <p class="text-white-50 mb-0">صندوق الكشاف &bull; Money Management</p>
             </div>
 
-            <form action="{{ url_for('login') }}" method="POST" autocomplete="on">
-                <div class="mb-4">
-                    <label for="email" class="visually-hidden">Username</label>
-                    <div class="input-group login-input-group">
-                        <span class="input-group-text">
-                            <i class="fa-regular fa-user"></i>
-                        </span>
-                        <input type="email"
-                               class="form-control"
-                               id="email"
-                               name="email"
-                               required
-                               autocomplete="username"
-                               placeholder="Username">
-                    </div>
+            <div class="card-body p-4 p-md-5 bg-white">
+                <div class="text-center mb-4">
+                    <span class="badge login-badge px-3 py-2 rounded-pill">
+                        <i class="fa-solid fa-lock me-1"></i> Restricted Troop Access
+                    </span>
+                    <p class="login-form-intro mb-0 mt-3">Enter your sign-in details</p>
                 </div>
 
-                <div class="mb-4">
-                    <label for="password" class="visually-hidden">Password</label>
-                    <div class="input-group login-input-group">
-                        <span class="input-group-text">
-                            <i class="fa-solid fa-lock"></i>
-                        </span>
-                        <input type="password"
-                               class="form-control"
-                               id="password"
-                               name="password"
-                               required
-                               autocomplete="current-password"
-                               placeholder="Password">
-                        <button class="btn login-password-toggle" type="button" id="togglePassword" aria-label="Show password">
-                            <i class="fa-regular fa-eye" id="eyeIcon"></i>
+                <form action="{{ url_for('login') }}" method="POST" autocomplete="on">
+                    <div class="mb-4">
+                        <label for="email" class="visually-hidden">Username</label>
+                        <div class="input-group login-input-group">
+                            <span class="input-group-text">
+                                <i class="fa-regular fa-user"></i>
+                            </span>
+                            <input type="email"
+                                   class="form-control"
+                                   id="email"
+                                   name="email"
+                                   required
+                                   autocomplete="username"
+                                   placeholder="Username">
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="password" class="visually-hidden">Password</label>
+                        <div class="input-group login-input-group">
+                            <span class="input-group-text">
+                                <i class="fa-solid fa-lock"></i>
+                            </span>
+                            <input type="password"
+                                   class="form-control"
+                                   id="password"
+                                   name="password"
+                                   required
+                                   autocomplete="current-password"
+                                   placeholder="Password">
+                            <button class="btn login-password-toggle" type="button" id="togglePassword" aria-label="Show password">
+                                <i class="fa-regular fa-eye" id="eyeIcon"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="d-grid mb-4">
+                        <button type="submit" class="btn login-submit-btn py-3 fw-semibold shadow-sm">
+                            <i class="fa-solid fa-right-to-bracket me-2"></i> Sign In to Scout Treasury
                         </button>
                     </div>
-                </div>
 
-                <div class="d-grid mb-4">
-                    <button type="submit" class="btn login-submit-btn py-3 fw-semibold shadow-sm">
-                        <i class="fa-solid fa-right-to-bracket me-2"></i> Sign In to Scout Treasury
-                    </button>
-                </div>
+                    <div class="text-center pt-3 border-top">
+                        <p class="text-muted small mb-2">
+                            Don't have an account?
+                            <a href="{{ url_for('signup') }}" class="fw-semibold auth-switch-link">Request access</a>
+                        </p>
+                        <p class="text-muted small mb-0">
+                            <i class="fa-solid fa-shield-halved me-1"></i>
+                            Troop Treasury Security &bull; "كن مستعداً"
+                        </p>
+                    </div>
+                </form>
+            </div>
+        </section>
 
-                <div class="text-center pt-3 border-top">
-                    <p class="text-muted small mb-2">
-                        Don't have an account?
-                        <a href="{{ url_for('signup') }}" class="fw-semibold auth-switch-link">Request access</a>
-                    </p>
-                    <p class="text-muted small mb-0">
-                        <i class="fa-solid fa-shield-halved me-1"></i>
-                        Troop Treasury Security &bull; "كن مستعداً"
-                    </p>
-                </div>
-            </form>
+        <div class="login-cover" id="loginCover" aria-label="Scout Treasury sign in" aria-hidden="false">
+            <div class="login-cover-half login-cover-half-left" aria-hidden="true"></div>
+            <div class="login-cover-half login-cover-half-right" aria-hidden="true"></div>
+            <div class="login-cover-content">
+                <span class="login-cover-emblem" aria-hidden="true">⚜️</span>
+                <h1 class="login-cover-title">Scout Treasury</h1>
+                <p class="login-cover-subtitle">Your troop funds, in good hands.</p>
+                <button class="btn login-reveal-btn" type="button" id="showLogin">
+                    <i class="fa-solid fa-right-to-bracket me-2" aria-hidden="true"></i>Sign In
+                </button>
+            </div>
         </div>
     </div>
 </div>
@@ -80,9 +96,29 @@
 
 {% block extra_scripts %}
 <script>
+    const loginStage = document.getElementById('loginStage');
+    const loginFormPanel = document.getElementById('loginFormPanel');
+    const loginCover = document.getElementById('loginCover');
+    const showLoginButton = document.getElementById('showLogin');
     const toggleBtn = document.getElementById('togglePassword');
     const pwdInput = document.getElementById('password');
     const eyeIcon = document.getElementById('eyeIcon');
+
+    if (loginStage && loginFormPanel && loginCover && showLoginButton) {
+        loginStage.classList.add('login-reveal-ready', 'login-reveal-closed');
+        loginFormPanel.setAttribute('aria-hidden', 'true');
+        loginCover.setAttribute('aria-hidden', 'false');
+        loginFormPanel.inert = true;
+
+        showLoginButton.addEventListener('click', function () {
+            loginStage.classList.remove('login-reveal-closed');
+            loginStage.classList.add('login-reveal-open');
+            loginFormPanel.removeAttribute('aria-hidden');
+            loginFormPanel.inert = false;
+            loginCover.setAttribute('aria-hidden', 'true');
+            document.getElementById('email').focus({ preventScroll: true });
+        });
+    }
 
     if (toggleBtn && pwdInput) {
         toggleBtn.addEventListener('click', function() {

@@ -117,6 +117,9 @@
         'Show password': ['Show password', 'إظهار كلمة المرور'],
         'Hide password': ['Hide password', 'إخفاء كلمة المرور'],
         'Sign In to Scout Treasury': ['Sign in to Scout Treasury', 'تسجيل الدخول إلى خزينة الكشافة'],
+        'Sign In': ['Sign in', 'تسجيل الدخول'],
+        'Your troop funds, in good hands.': ['Your troop funds, in good hands.', 'أموال مجموعتكم الكشفية في أيدٍ أمينة.'],
+        'Enter your sign-in details': ['Enter your sign-in details', 'أدخل بيانات تسجيل الدخول'],
         'Troop Treasury Security • "كن مستعداً"': ['Troop treasury security • "Be Prepared"', 'أمان خزينة المجموعة • "كن مستعداً"'],
         'Please sign in to access Scout Treasury.':
             ['Please sign in to access Scout Treasury.', 'يرجى تسجيل الدخول للوصول إلى خزينة الكشافة.'],
