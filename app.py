@@ -442,7 +442,7 @@ def add_transaction():
     if trans_type not in ('income', 'expense'):
         trans_type = 'income'
 
-    database.add_transaction(
+    transaction_id = database.add_transaction(
         type_=trans_type,
         amount=amount,
         currency=currency,
@@ -453,8 +453,12 @@ def add_transaction():
         owner=current_owner()
     )
 
-    t_label ='Income (وارد)' if trans_type == 'income' else 'Expense (مصروف)'
-    flash(f'{t_label} of {format_currency_filter(amount, currency)} added successfully!', 'success')
+    t_label = 'Income (وارد)' if trans_type == 'income' else 'Expense (مصروف)'
+    flash(
+        f'Transaction #{transaction_id}: {t_label} of '
+        f'{format_currency_filter(amount, currency)} added successfully!',
+        'success'
+    )
     return redirect(request.referrer or url_for('dashboard'))
 
 

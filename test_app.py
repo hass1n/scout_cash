@@ -165,6 +165,27 @@ class ScoutFinanceTestCase(unittest.TestCase):
         }, follow_redirects=True)
         self.assertEqual(res.status_code, 200)
         self.assertIn(b'Summer Camp Registration', res.data)
+        self.assertIn(b'Transaction #1', res.data)
+        self.assertIn(b'>#1</td>', res.data)
+        self.assertIn(b'id="period-summary"', res.data)
+        self.assertIn(b'Summary for Selected Period', res.data)
+        self.assertIn(b'Printed on:', res.data)
+        self.assertIn(b'Income (LBP)', res.data)
+        self.assertIn(b'Net Period Result ($):', res.data)
+
+        # Expense transactions also display their unique ID in the dashboard.
+        res = self.client.post('/transaction/add', data={
+            'type': 'expense',
+            'amount': '25',
+            'currency': 'USD',
+            'party_or_purpose': 'Camp supplies',
+            'category': 'Supplies',
+            'date': '2026-10-16'
+        }, follow_redirects=True)
+        self.assertEqual(res.status_code, 200)
+        self.assertIn(b'Transaction #2', res.data)
+        self.assertIn(b'>#2</td>', res.data)
+        self.assertIn(b'id="period-summary"', res.data)
 
         # Test "This Month" filter view
         res = self.client.get('/?preset=this_month')

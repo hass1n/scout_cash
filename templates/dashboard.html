@@ -219,7 +219,7 @@
                     </div>
 
                     <!-- Export & Print Actions -->
-                    <div class="d-flex gap-2">
+                    <div class="d-flex gap-2 period-summary-actions">
                         <a href="{{ url_for('export_csv', start_date=start_date, end_date=end_date, currency=currency, type=trans_type, search=search) }}" 
                            class="btn btn-outline-success btn-sm bg-white shadow-sm">
                             <i class="fa-solid fa-file-excel me-1"></i> Export CSV
@@ -244,9 +244,13 @@
                     <!-- Income LBP -->
                     <div class="col-6 col-md-3">
                         <div class="p-2 rounded bg-white border">
-                            <div class="text-muted extra-small">Income (ل.ل) &bull; {{ period_stats.lbp_income_count }} tx</div>
+                            <div class="text-muted extra-small">
+                                <span class="screen-only">Income (ل.ل)</span><span class="print-only">Income (LBP)</span>
+                                &bull; {{ period_stats.lbp_income_count }} tx
+                            </div>
                             <div class="fw-bold text-success fs-5">
-                                {{ period_stats.lbp_income | format_currency('LBP') }}
+                                <span class="screen-only">{{ period_stats.lbp_income | format_currency('LBP') }}</span>
+                                <span class="print-only">{{ period_stats.lbp_income | format_num }} LBP</span>
                             </div>
                         </div>
                     </div>
@@ -262,9 +266,13 @@
                     <!-- Expense LBP -->
                     <div class="col-6 col-md-3">
                         <div class="p-2 rounded bg-white border">
-                            <div class="text-muted extra-small">Expenses (ل.ل) &bull; {{ period_stats.lbp_expense_count }} tx</div>
+                            <div class="text-muted extra-small">
+                                <span class="screen-only">Expenses (ل.ل)</span><span class="print-only">Expenses (LBP)</span>
+                                &bull; {{ period_stats.lbp_expense_count }} tx
+                            </div>
                             <div class="fw-bold text-danger fs-5">
-                                {{ period_stats.lbp_expense | format_currency('LBP') }}
+                                <span class="screen-only">{{ period_stats.lbp_expense | format_currency('LBP') }}</span>
+                                <span class="print-only">{{ period_stats.lbp_expense | format_num }} LBP</span>
                             </div>
                         </div>
                     </div>
@@ -285,10 +293,12 @@
                     <div class="col-12 col-md-6">
                         <div class="py-2 px-3 rounded bg-light border d-flex justify-content-between align-items-center">
                             <span class="small fw-semibold text-secondary">
-                                Net Period Result (ل.ل):
+                                <span class="screen-only">Net Period Result (ل.ل):</span>
+                                <span class="print-only">Net Period Result (LBP):</span>
                             </span>
                             <span class="fw-bold {% if period_stats.lbp_net >= 0 %}text-primary{% else %}text-danger{% endif %}">
-                                {{ period_stats.lbp_net | format_currency('LBP') }}
+                                <span class="screen-only">{{ period_stats.lbp_net | format_currency('LBP') }}</span>
+                                <span class="print-only">{{ period_stats.lbp_net | format_num }} LBP</span>
                             </span>
                         </div>
                     </div>
@@ -329,7 +339,8 @@
                         <table class="table table-hover align-middle mb-0 transaction-table">
                             <thead class="table-light text-muted small">
                                 <tr>
-                                    <th class="ps-4">Date</th>
+                                    <th class="ps-4">ID</th>
+                                    <th class="ps-2">Date</th>
                                     <th>Type</th>
                                     <th>Party / Purpose</th>
                                     <th>Category</th>
@@ -341,7 +352,8 @@
                             <tbody>
                                 {% for t in transactions %}
                                 <tr>
-                                    <td class="ps-4 text-nowrap">
+                                    <td class="ps-4 text-nowrap fw-semibold">#{{ t.id }}</td>
+                                    <td class="ps-2 text-nowrap">
                                         <i class="fa-regular fa-calendar-days text-muted me-1"></i>
                                         <span class="fw-semibold">{{ t.date }}</span>
                                     </td>
@@ -435,7 +447,8 @@
                         <table class="table table-hover align-middle mb-0">
                             <thead class="table-light text-muted small">
                                 <tr>
-                                    <th class="ps-4">Date</th>
+                                    <th class="ps-4">ID</th>
+                                    <th class="ps-2">Date</th>
                                     <th>From Who (من مين)</th>
                                     <th>Category</th>
                                     <th>Amount</th>
@@ -446,7 +459,8 @@
                             <tbody>
                                 {% for inc in incomes %}
                                 <tr>
-                                    <td class="ps-4 text-nowrap fw-semibold">{{ inc.date }}</td>
+                                    <td class="ps-4 text-nowrap fw-semibold">#{{ inc.id }}</td>
+                                    <td class="ps-2 text-nowrap fw-semibold">{{ inc.date }}</td>
                                     <td>
                                         <div class="fw-bold text-dark fs-6">{{ inc.party_or_purpose }}</div>
                                         <span class="badge bg-light text-muted border extra-small">Source / Contributor</span>
@@ -512,7 +526,8 @@
                         <table class="table table-hover align-middle mb-0">
                             <thead class="table-light text-muted small">
                                 <tr>
-                                    <th class="ps-4">Date</th>
+                                    <th class="ps-4">ID</th>
+                                    <th class="ps-2">Date</th>
                                     <th>For What (السبب / الغاية)</th>
                                     <th>Category</th>
                                     <th>Amount</th>
@@ -523,7 +538,8 @@
                             <tbody>
                                 {% for exp in expenses %}
                                 <tr>
-                                    <td class="ps-4 text-nowrap fw-semibold">{{ exp.date }}</td>
+                                    <td class="ps-4 text-nowrap fw-semibold">#{{ exp.id }}</td>
+                                    <td class="ps-2 text-nowrap fw-semibold">{{ exp.date }}</td>
                                     <td>
                                         <div class="fw-bold text-dark fs-6">{{ exp.party_or_purpose }}</div>
                                         <span class="badge bg-light text-muted border extra-small">Troop Expense / Purchase</span>
