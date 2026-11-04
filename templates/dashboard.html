@@ -112,8 +112,8 @@
         </div>
     </div>
 
-    <!-- FILTER & REPORTING SECTION -->
-    <div class="card border-0 shadow-sm rounded-4 mb-4">
+    <!-- FILTER & REPORTING SECTION (print styles keep only its period summary) -->
+    <div class="card border-0 shadow-sm rounded-4 mb-4 period-filter-card">
         <div class="card-header bg-white border-0 pt-4 pb-2 px-4 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 d-print-none">
             <div>
                 <h5 class="fw-bold mb-0 text-dark">
@@ -194,10 +194,10 @@
             </form>
 
             <!-- PERIOD SUMMARY HIGHLIGHT CARD (the only part "Print Report" prints) -->
-            <div class="period-summary-banner mt-4 p-3 rounded-3 border">
+            <div class="period-summary-banner mt-4 p-3 rounded-3 border" id="period-summary">
                 <div class="d-none d-print-block mb-3">
                     <h4 class="fw-bold mb-1">⚜️ Scout Sandou2</h4>
-                    <div class="small text-muted">Printed on <strong>{{ today_date }}</strong></div>
+                    <div class="print-date small">Printed on: <strong>{{ today_date }}</strong></div>
                 </div>
                 <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-3">
                     <div class="d-flex align-items-center gap-2">
