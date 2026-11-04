@@ -57,6 +57,7 @@
         'All Time Overview': ['All-time overview', 'نظرة عامة على كل الفترات'],
         'Export CSV': ['Export CSV', 'تصدير CSV'],
         'Print Report': ['Print report', 'طباعة التقرير'],
+        'Printed on': ['Printed on', 'تاريخ الطباعة'],
         'Net Period Result ($):': ['Net result (USD):', 'صافي النتيجة (دولار):'],
         'Net Period Result (ل.ل):': ['Net result (LBP):', 'صافي النتيجة (ليرة):'],
         'Date': ['Date', 'التاريخ'],
