@@ -542,8 +542,10 @@ body {
 
 /* PRINT STYLES */
 @media print {
-    body {
-        background-color: #fff !important;
+    body,
+    body.bg-light,
+    .main-wrapper {
+        background: #fff !important;
     }
     .scout-navbar,
     .btn,
@@ -559,5 +561,21 @@ body {
     }
     .wallet-card {
         break-inside: avoid;
+    }
+    /* "Print Report" prints only the period summary: drop the card around it */
+    .card:has(.period-summary-banner) {
+        border: 0 !important;
+    }
+    .card:has(.period-summary-banner) > .card-body {
+        padding: 0 !important;
+    }
+    .main-wrapper {
+        padding-top: 0 !important;
+    }
+    .period-summary-banner {
+        margin-top: 0 !important;
+        break-inside: avoid;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
     }
 }
