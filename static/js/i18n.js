@@ -1,7 +1,7 @@
 // Translate the site's interface while leaving user-entered transaction data untouched.
 (function () {
     const translations = {
-        'Scout Sandou2': ['Scout Sandou2', 'كشافة صندوق 2'],
+        'Scout Treasury': ['Scout Treasury', 'خزينة الكشافة'],
         '| صندوق الكشاف': '| Scout Treasury', '| Scout Treasury': '| صندوق الكشاف',
         'Toggle navigation': ['Toggle navigation', 'تبديل القائمة'],
         'Dashboard': ['Dashboard', 'لوحة التحكم'],
@@ -11,13 +11,14 @@
         'Income (وارد)': ['Income', 'إيراد'],
         'Expense (مصروف)': ['Expense', 'مصروف'],
         'Sign Out': ['Sign Out', 'تسجيل الخروج'],
-        '⚜️ Scout Sandou2 Finance Manager • Designed for Troop Administration • 2026':
-            ['⚜️ Scout Sandou2 Finance Manager • Designed for Troop Administration • 2026', '⚜️ مدير الشؤون المالية لصندوق الكشافة • لإدارة المجموعة الكشفية • 2026'],
+        '⚜️ Scout Treasury • Troop Finance, Made Clear • 2026':
+            ['⚜️ Scout Treasury • Troop Finance, Made Clear • 2026', '⚜️ خزينة الكشافة • إدارة مالية واضحة للمجموعة • 2026'],
         'Language': ['Language', 'اللغة'],
         'Close': ['Close', 'إغلاق'],
-        'Scout Treasury - Sandou2': ['Scout Treasury - Sandou2', 'خزينة الكشافة - صندوق 2'],
-        'Dashboard • Scout Sandou2 Finance': ['Dashboard • Scout Sandou2 Finance', 'لوحة التحكم • الشؤون المالية لصندوق الكشافة'],
-        'Sign In - Scout Sandou2 Finance': ['Sign In - Scout Sandou2 Finance', 'تسجيل الدخول - الشؤون المالية لصندوق الكشافة'],
+        'Dashboard • Scout Treasury': ['Dashboard • Scout Treasury', 'لوحة التحكم • خزينة الكشافة'],
+        'Sign In • Scout Treasury': ['Sign in • Scout Treasury', 'تسجيل الدخول • خزينة الكشافة'],
+        'Request Access • Scout Treasury': ['Request access • Scout Treasury', 'طلب انضمام • خزينة الكشافة'],
+        'Users • Scout Treasury': ['Users • Scout Treasury', 'المستخدمون • خزينة الكشافة'],
         'صندوق الكشاف • Money Management': ['Scout Treasury • Money Management', 'صندوق الكشاف • إدارة الأموال'],
         '⚜️ Scout Treasury Overview': ['⚜️ Scout Treasury Overview', '⚜️ نظرة عامة على خزينة الكشافة'],
         'Track income (من مين), manage expenses (لشو), and monitor real-time $ & ل.ل cash box balances.':
@@ -115,10 +116,10 @@
         'Password': ['Password', 'كلمة المرور'],
         'Show password': ['Show password', 'إظهار كلمة المرور'],
         'Hide password': ['Hide password', 'إخفاء كلمة المرور'],
-        'Sign In to Sandou2': ['Sign in to Sandou2', 'تسجيل الدخول إلى صندوق 2'],
+        'Sign In to Scout Treasury': ['Sign in to Scout Treasury', 'تسجيل الدخول إلى خزينة الكشافة'],
         'Troop Treasury Security • "كن مستعداً"': ['Troop treasury security • "Be Prepared"', 'أمان خزينة المجموعة • "كن مستعداً"'],
-        'Please sign in to access Scout Money Management.':
-            ['Please sign in to access Scout Money Management.', 'يرجى تسجيل الدخول للوصول إلى إدارة أموال الكشافة.'],
+        'Please sign in to access Scout Treasury.':
+            ['Please sign in to access Scout Treasury.', 'يرجى تسجيل الدخول للوصول إلى خزينة الكشافة.'],
         'أهلاً وسهلاً بك في صندوق فوج الدورة': ['Welcome to the troop treasury', 'أهلاً وسهلاً بك في صندوق فوج الدورة'],
         'Invalid email or password. Access is restricted to authorized account only.':
             ['Invalid email or password. Access is restricted to the authorized account only.', 'البريد الإلكتروني أو كلمة المرور غير صحيحة. الدخول مخصص للحساب المعتمد فقط.'],
@@ -155,7 +156,6 @@
         "Don't have an account?": ["Don't have an account?", 'ليس لديك حساب؟'],
         'Request access': ['Request access', 'اطلب الانضمام'],
         'Request Access': ['Request Access', 'طلب انضمام'],
-        'Request Access - Scout Sandou2 Finance': ['Request Access - Scout Sandou2 Finance', 'طلب انضمام - الشؤون المالية لصندوق الكشافة'],
         'The admin will approve or decline your request': ['The admin will approve or decline your request', 'سيوافق المسؤول على طلبك أو يرفضه'],
         'Full name': ['Full name', 'الاسم الكامل'],
         'Email': ['Email', 'البريد الإلكتروني'],
@@ -179,7 +179,6 @@
             ['An account or request with this email already exists.', 'يوجد حساب أو طلب بهذا البريد الإلكتروني مسبقاً.'],
         'This request was already handled.': ['This request was already handled.', 'تمت معالجة هذا الطلب مسبقاً.'],
         'Users': ['Users', 'المستخدمون'],
-        'Users • Scout Sandou2 Finance': ['Users • Scout Sandou2 Finance', 'المستخدمون • الشؤون المالية لصندوق الكشافة'],
         '👥 Users & Access Requests': ['👥 Users & Access Requests', '👥 المستخدمون وطلبات الانضمام'],
         'Approve or decline sign-up requests, and create accounts for troop members.':
             ['Approve or decline sign-up requests, and create accounts for troop members.', 'وافق على طلبات التسجيل أو ارفضها، وأنشئ حسابات لأعضاء المجموعة.'],

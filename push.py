@@ -1,5 +1,5 @@
 """
-Push notifications to the Scout Sandou2 Android app through Firebase Cloud Messaging.
+Push notifications to the Scout Treasury Android app through Firebase Cloud Messaging.
 
 Set FIREBASE_CREDENTIALS to the contents of a Firebase service-account JSON key.
 Without it, notifications are skipped and the rest of the app works normally.

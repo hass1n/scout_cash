@@ -1,5 +1,5 @@
 """
-Optional sample data seeder for Scout Sandou2 Treasury.
+Optional sample data seeder for Scout Treasury.
 Run this script anytime to insert initial representative data for testing.
 """
 import os

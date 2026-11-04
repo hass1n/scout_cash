@@ -48,7 +48,7 @@ def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if 'user' not in session:
-            flash('Please sign in to access Scout Money Management.', 'warning')
+            flash('Please sign in to access Scout Treasury.', 'warning')
             return redirect(url_for('login'))
         if not is_admin():
             # The admin may have removed this account or changed its email since sign-in
@@ -173,7 +173,7 @@ def signup():
         if push_token:
             database.register_device(push_token, email, current_language())
         push.notify_email(AUTHORIZED_EMAIL, {
-            'en': ('New sign-up request', f'{name} ({email}) wants to join Scout Sandou2.'),
+            'en': ('New sign-up request', f'{name} ({email}) wants to join Scout Treasury.'),
             'ar': ('طلب تسجيل جديد', f'{name} ({email}) يريد الانضمام إلى صندوق الكشاف.'),
         })
 
@@ -298,13 +298,13 @@ def decide_user(user_id, decision):
 
     if status == 'approved':
         push.notify_email(user['email'], {
-            'en': ('Request approved ✅', 'Your Scout Sandou2 account was approved. You can sign in now.'),
+            'en': ('Request approved ✅', 'Your Scout Treasury account was approved. You can sign in now.'),
             'ar': ('تمت الموافقة ✅', 'تمت الموافقة على حسابك في صندوق الكشاف. يمكنك تسجيل الدخول الآن.'),
         })
         flash(f'{user["email"]} was approved.', 'success')
     else:
         push.notify_email(user['email'], {
-            'en': ('Request declined', 'Your Scout Sandou2 sign-up request was declined.'),
+            'en': ('Request declined', 'Your Scout Treasury sign-up request was declined.'),
             'ar': ('تم رفض الطلب', 'تم رفض طلب تسجيلك في صندوق الكشاف.'),
         })
         flash(f'{user["email"]} was declined.', 'info')

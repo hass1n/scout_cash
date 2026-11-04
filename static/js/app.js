@@ -1,4 +1,4 @@
-// Scout Sandou2 Finance JavaScript
+// Scout Treasury Finance JavaScript
 document.addEventListener('DOMContentLoaded', function () {
 
     // EDIT MODAL HANDLER

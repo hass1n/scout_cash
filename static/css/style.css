@@ -646,3 +646,269 @@ body {
         print-color-adjust: exact;
     }
 }
+
+/* Scout Treasury visual refresh */
+:root {
+    --scout-primary: #176b52;
+    --scout-primary-dark: #104c3c;
+    --scout-secondary: #1f8062;
+    --scout-accent: #e8c77a;
+    --scout-accent-hover: #f0d99c;
+    --scout-bg: #f4f7f4;
+    --income-color: #16835d;
+    --expense-color: #c4514b;
+    --usd-color: #176b52;
+    --lbp-color: #b38732;
+    --bs-primary: #176b52;
+    --bs-primary-rgb: 23, 107, 82;
+}
+
+body,
+body.bg-light {
+    background-color: var(--scout-bg) !important;
+    color: #23332d;
+}
+
+.scout-navbar {
+    background: linear-gradient(110deg, #103f34 0%, #176b52 65%, #1c7559 100%);
+    border-bottom: 1px solid rgba(232, 199, 122, 0.6);
+    box-shadow: 0 8px 26px rgba(16, 63, 52, 0.14);
+}
+
+.scout-badge-icon {
+    width: 42px;
+    height: 42px;
+    color: #f1d995;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(241, 217, 149, 0.7);
+    border-radius: 13px;
+}
+
+.scout-navbar .navbar-nav {
+    gap: 0.25rem;
+}
+
+.scout-navbar .nav-link {
+    padding: 0.6rem 0.85rem;
+    color: rgba(255, 255, 255, 0.78);
+    border-radius: 0.7rem;
+    transition: color 0.18s ease, background-color 0.18s ease;
+}
+
+.scout-navbar .nav-link:hover,
+.scout-navbar .nav-link.active {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.13);
+}
+
+.btn,
+.form-control,
+.form-select {
+    border-radius: 0.7rem;
+}
+
+.btn-scout-primary,
+.login-submit-btn {
+    background-color: var(--scout-primary);
+    border-color: var(--scout-primary);
+}
+
+.btn-scout-primary:hover,
+.login-submit-btn:hover {
+    background-color: var(--scout-primary-dark);
+    border-color: var(--scout-primary-dark);
+}
+
+.btn-scout-accent {
+    background-color: var(--income-color);
+    border-color: var(--income-color);
+}
+
+.btn-scout-accent:hover {
+    background-color: #116848;
+    border-color: #116848;
+}
+
+.btn-outline-danger-scout {
+    background-color: #fff;
+    border-color: #e5b7b2;
+    color: #a63e39;
+}
+
+.btn-outline-danger-scout:hover {
+    background-color: #fff2f0;
+    border-color: #d88c84;
+    color: #8f302c;
+}
+
+.main-wrapper {
+    padding-top: 1.5rem !important;
+    padding-bottom: 2rem !important;
+}
+
+.dashboard-page > .d-print-none:first-child {
+    padding: 1.6rem 1.75rem;
+    background: linear-gradient(115deg, #e8f1ec 0%, #f5f7ef 70%, #f7f1df 100%);
+    border: 1px solid #dce8df;
+    border-radius: 1.25rem;
+}
+
+.dashboard-page h2,
+.users-page h2 {
+    color: #183f33 !important;
+    letter-spacing: -0.035em;
+}
+
+.card {
+    border: 1px solid #e4ebe5 !important;
+    border-radius: 1rem !important;
+    box-shadow: 0 6px 22px rgba(30, 65, 50, 0.055) !important;
+}
+
+.wallet-card {
+    border-top: 3px solid var(--usd-color) !important;
+    border-left: 1px solid #e4ebe5;
+    background: linear-gradient(145deg, #fff 0%, #f5faf6 100%);
+}
+
+.wallet-lbp {
+    border-top-color: var(--lbp-color) !important;
+    background: linear-gradient(145deg, #fff 0%, #fcf8ed 100%);
+}
+
+.wallet-icon-circle {
+    border-radius: 15px;
+}
+
+.usd-circle {
+    background: #e3f1e9;
+    color: #176b52;
+}
+
+.lbp-circle {
+    background: #f4ecd8;
+    color: #987124;
+}
+
+.dashboard-page .wallet-amount,
+.dashboard-page .wallet-amount.text-success,
+.dashboard-page .wallet-amount.text-primary {
+    color: #176b52 !important;
+    letter-spacing: -0.045em;
+}
+
+.bg-usd-pill {
+    background: #e7f2eb;
+    color: #15583f;
+}
+
+.bg-lbp-pill {
+    background: #f5efde;
+    color: #785b1e;
+}
+
+.nav-pills .nav-link.active {
+    background-color: var(--scout-primary);
+}
+
+.transaction-table thead th {
+    color: #51685e;
+    background: #f2f6f2;
+    border-bottom-color: #dce7de;
+}
+
+.transaction-table tbody tr:hover {
+    background-color: #f5f9f5;
+}
+
+.period-summary-banner {
+    background: #eff5f0;
+    border-color: #dbe8dd;
+    border-radius: 0.9rem;
+}
+
+.login-page {
+    min-height: calc(100vh - 130px);
+    background:
+        radial-gradient(ellipse at 18% 18%, rgba(232, 199, 122, 0.23), transparent 34%),
+        radial-gradient(ellipse at 86% 82%, rgba(31, 128, 98, 0.16), transparent 38%),
+        #f1f5f0;
+}
+
+.login-card {
+    border: 1px solid #e1e9e2 !important;
+    box-shadow: 0 24px 70px rgba(22, 61, 46, 0.13) !important;
+}
+
+.login-header {
+    background: linear-gradient(135deg, #124b3a 0%, #1b7659 100%);
+    border-bottom: 3px solid var(--scout-accent);
+}
+
+.scout-emblem-wrapper {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(241, 217, 149, 0.8);
+}
+
+.scout-emblem-icon {
+    color: #f2d994;
+}
+
+.login-badge {
+    background: #edf5ef;
+    color: #15583f;
+    border-color: #d7e7db;
+}
+
+.login-input-group .input-group-text,
+.login-input-group .form-control,
+.login-password-toggle {
+    border-color: #dce6de;
+}
+
+.login-input-group .input-group-text,
+.login-password-toggle {
+    color: var(--scout-primary);
+}
+
+.login-input-group .form-control:focus,
+.login-input-group:focus-within .input-group-text,
+.login-input-group:focus-within .form-control,
+.login-input-group:focus-within .login-password-toggle {
+    border-color: #4a9a79;
+}
+
+.auth-switch-link {
+    color: var(--scout-primary-dark);
+}
+
+.auth-switch-link:hover {
+    color: #0c382c;
+}
+
+.login-submit-btn:focus-visible,
+.login-password-toggle:focus-visible {
+    outline-color: rgba(23, 107, 82, 0.32);
+}
+
+.footer {
+    background: #fff !important;
+    border-top-color: #e1e9e2 !important;
+    color: #718078 !important;
+    letter-spacing: 0.01em;
+}
+
+:focus-visible {
+    outline-color: rgba(23, 107, 82, 0.55);
+}
+
+@media (max-width: 575.98px) {
+    .dashboard-page > .d-print-none:first-child {
+        padding: 1.25rem;
+        border-radius: 1rem;
+    }
+
+    .main-wrapper {
+        padding-top: 1rem !important;
+    }
+}

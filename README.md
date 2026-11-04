@@ -1,4 +1,4 @@
-# ⚜️ Scout Sandou2 - Money Management Web Application
+# ⚜️ Scout Treasury - Money Management Web Application
 
 A Flask web application designed for Scout group treasury management, tracking **Incomes (واردات)**, **Expenses (مصاريف)**, and live cash box balances across dual currencies: **USD ($)** and **Lebanese Pounds (LBP / ل.ل)**.
 
