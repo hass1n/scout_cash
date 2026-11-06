@@ -198,6 +198,18 @@
                 <div class="d-none d-print-block mb-3">
                     <h4 class="fw-bold mb-1">⚜️ Scout Treasury</h4>
                     <div class="print-date small">Printed on: <strong>{{ today_date }}</strong></div>
+                    <div class="print-period small fw-bold">
+                        Report period:
+                        {% if start_date and end_date %}
+                            From <strong>{{ start_date }}</strong> to <strong>{{ end_date }}</strong>
+                        {% elif start_date %}
+                            Starting from <strong>{{ start_date }}</strong>
+                        {% elif end_date %}
+                            Up to <strong>{{ end_date }}</strong>
+                        {% else %}
+                            <strong>All Time</strong>
+                        {% endif %}
+                    </div>
                 </div>
                 <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-3">
                     <div class="d-flex align-items-center gap-2">

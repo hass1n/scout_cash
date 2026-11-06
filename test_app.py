@@ -170,6 +170,8 @@ class ScoutFinanceTestCase(unittest.TestCase):
         self.assertIn(b'id="period-summary"', res.data)
         self.assertIn(b'Summary for Selected Period', res.data)
         self.assertIn(b'Printed on:', res.data)
+        self.assertIn(b'Report period:', res.data)
+        self.assertIn(b'All Time', res.data)
         self.assertIn(b'Income (LBP)', res.data)
         self.assertIn(b'Net Period Result ($):', res.data)
 
@@ -190,6 +192,15 @@ class ScoutFinanceTestCase(unittest.TestCase):
         # Test "This Month" filter view
         res = self.client.get('/?preset=this_month')
         self.assertEqual(res.status_code, 200)
+
+        # A custom print report identifies its exact date range.
+        res = self.client.get(
+            '/?preset=custom&start_date=2026-10-10&end_date=2026-10-20'
+        )
+        self.assertEqual(res.status_code, 200)
+        self.assertIn(b'Report period:', res.data)
+        self.assertIn(b'2026-10-10', res.data)
+        self.assertIn(b'2026-10-20', res.data)
 
         # Test CSV export
         res = self.client.get('/export')

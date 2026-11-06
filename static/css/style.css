@@ -624,6 +624,12 @@ body {
         font-weight: 600;
     }
 
+    .print-period {
+        display: block !important;
+        margin-bottom: 0.75rem;
+        color: #000 !important;
+    }
+
     .period-summary-banner .bg-white,
     .period-summary-banner .bg-light {
         color: #000 !important;
