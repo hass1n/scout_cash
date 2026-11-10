@@ -660,7 +660,7 @@ body {
     --scout-secondary: #1f8062;
     --scout-accent: #e8c77a;
     --scout-accent-hover: #f0d99c;
-    --scout-bg: #f4f7f4;
+    --scout-bg: #fff;
     --income-color: #16835d;
     --expense-color: #c4514b;
     --usd-color: #176b52;
@@ -865,10 +865,7 @@ body.bg-light {
 
 .login-page {
     min-height: calc(100vh - 130px);
-    background:
-        radial-gradient(ellipse at 18% 18%, rgba(232, 199, 122, 0.23), transparent 34%),
-        radial-gradient(ellipse at 86% 82%, rgba(31, 128, 98, 0.16), transparent 38%),
-        #f1f5f0;
+    background: #fff;
 }
 
 .login-card {
@@ -877,8 +874,8 @@ body.bg-light {
 }
 
 .login-header {
-    background: linear-gradient(135deg, #124b3a 0%, #1b7659 100%);
-    border-bottom: 3px solid var(--scout-accent);
+    background: linear-gradient(135deg, #dc6f21 0%, #e78332 100%);
+    border-bottom: 3px solid #f4b77c;
 }
 
 .scout-emblem-wrapper {
@@ -891,40 +888,50 @@ body.bg-light {
 }
 
 .login-badge {
-    background: #edf5ef;
-    color: #15583f;
-    border-color: #d7e7db;
+    background: #fff4e8;
+    color: #a64e16;
+    border-color: #f3d2b5;
 }
 
 .login-input-group .input-group-text,
 .login-input-group .form-control,
 .login-password-toggle {
-    border-color: #dce6de;
+    border-color: #e9ddd2;
 }
 
 .login-input-group .input-group-text,
 .login-password-toggle {
-    color: var(--scout-primary);
+    color: #c65e1b;
 }
 
 .login-input-group .form-control:focus,
 .login-input-group:focus-within .input-group-text,
 .login-input-group:focus-within .form-control,
 .login-input-group:focus-within .login-password-toggle {
-    border-color: #4a9a79;
+    border-color: #e78332;
+}
+
+.login-page .login-submit-btn {
+    background-color: #dc6f21;
+    border-color: #dc6f21;
+}
+
+.login-page .login-submit-btn:hover {
+    background-color: #c45c18;
+    border-color: #c45c18;
 }
 
 .auth-switch-link {
-    color: var(--scout-primary-dark);
+    color: #bd5716;
 }
 
 .auth-switch-link:hover {
-    color: #0c382c;
+    color: #98420f;
 }
 
 .login-submit-btn:focus-visible,
 .login-password-toggle:focus-visible {
-    outline-color: rgba(23, 107, 82, 0.32);
+    outline-color: rgba(220, 111, 33, 0.35);
 }
 
 .footer {
