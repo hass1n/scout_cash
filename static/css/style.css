@@ -167,19 +167,12 @@ body {
     background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
     border-bottom: 4px solid #fed7aa;
 }
-.scout-emblem-wrapper {
-    width: 84px;
-    height: 84px;
-    background: rgba(255, 255, 255, 0.18);
-    border: 2px solid rgba(255, 255, 255, 0.65);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-.scout-emblem-icon {
-    font-size: 2.4rem;
-    color: #ffffff;
+.scout-emblem-image {
+    display: block;
+    width: 96px;
+    height: 96px;
+    object-fit: contain;
+    filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.2));
 }
 .login-badge {
     background-color: #fff7ed;
@@ -753,7 +746,7 @@ body.bg-light {
 }
 
 .dashboard-page > .d-print-none:first-child {
-    padding: 1.6rem 1.75rem;
+    padding: 1rem 1.25rem;
     background: linear-gradient(115deg, #e8f1ec 0%, #f5f7ef 70%, #f7f1df 100%);
     border: 1px solid #dce8df;
     border-radius: 1.25rem;
@@ -764,13 +757,15 @@ body.bg-light {
 }
 
 .dashboard-heading-title {
+    flex: 0 1 360px;
+    max-width: 360px;
     order: 1;
     text-align: right;
 }
 
 .dashboard-brand-logo {
     display: block;
-    width: min(100%, 300px);
+    width: min(100%, 240px);
     height: auto;
     margin-left: auto;
 }
@@ -876,15 +871,6 @@ body.bg-light {
 .login-header {
     background: linear-gradient(135deg, #dc6f21 0%, #e78332 100%);
     border-bottom: 3px solid #f4b77c;
-}
-
-.scout-emblem-wrapper {
-    background: rgba(255, 255, 255, 0.12);
-    border-color: rgba(241, 217, 149, 0.8);
-}
-
-.scout-emblem-icon {
-    color: #f2d994;
 }
 
 .login-badge {

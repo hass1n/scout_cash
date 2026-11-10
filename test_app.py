@@ -141,6 +141,11 @@ class ScoutFinanceTestCase(unittest.TestCase):
             'password': 'bad'
         }, follow_redirects=True)
         self.assertIn(b'Invalid email or password', res.data)
+        self.assertIn(b'images/scout-emblem.png', res.data)
+        self.assertNotIn(b'class="scout-emblem-icon"', res.data)
+        logo_response = self.client.get('/static/images/scout-emblem.png')
+        self.assertEqual(logo_response.status_code, 200)
+        logo_response.close()
 
         # Attempt valid login with authorized credentials
         res = self.client.post('/login', data={
