@@ -974,72 +974,78 @@ body.bg-light {
     position: absolute;
     z-index: 2;
     inset: 0;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
+    display: block;
     overflow: hidden;
+    background: linear-gradient(145deg, #fffdf8 0%, #f5f1e7 100%);
 }
 
 .login-cover-half {
     position: absolute;
     inset-block: 0;
     width: 50%;
-    background: linear-gradient(145deg, #124b3a 0%, #176b52 55%, #1b7659 100%);
+    overflow: hidden;
+    background: linear-gradient(145deg, #fffdf8 0%, #f5f1e7 100%);
     transition: transform 0.85s cubic-bezier(0.76, 0, 0.24, 1);
     will-change: transform;
 }
 
 .login-cover-half-left {
     left: 0;
-    border-right: 1px solid rgba(241, 217, 149, 0.32);
 }
 
 .login-cover-half-right {
     right: 0;
-    background: linear-gradient(215deg, #124b3a 0%, #176b52 55%, #1b7659 100%);
+}
+
+.login-cover-half-image {
+    position: absolute;
+    top: 0;
+    width: 200%;
+    height: 100%;
+    max-width: none;
+    object-fit: contain;
+}
+
+.login-cover-half-left .login-cover-half-image {
+    left: 0;
+}
+
+.login-cover-half-right .login-cover-half-image {
+    right: 0;
 }
 
 .login-cover-content {
-    position: relative;
+    position: absolute;
     z-index: 1;
-    grid-column: 1 / -1;
-    align-self: center;
-    justify-self: center;
-    width: min(100% - 2rem, 420px);
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 1rem;
+    width: 100%;
     padding: 2rem 1rem;
-    color: #fff;
+    border: 0;
+    background: transparent;
     text-align: center;
-    transform: translateY(clamp(-9rem, -18vh, -5rem));
-    transition: opacity 0.3s ease, transform 0.5s ease;
+    cursor: pointer;
+    transition: opacity 0.3s ease;
 }
 
-.login-cover-emblem {
-    display: grid;
-    place-items: center;
-    width: 132px;
-    height: 132px;
-    margin: 0 auto 1.5rem;
-    border: 1px solid rgba(241, 217, 149, 0.78);
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.08);
-    box-shadow: 0 0 0 10px rgba(255, 255, 255, 0.035), 0 18px 48px rgba(5, 35, 25, 0.2);
-    font-size: 5.2rem;
-    line-height: 1;
-}
-
-.login-cover-title {
-    margin-bottom: 0.5rem;
-    font-size: clamp(2rem, 7vw, 2.8rem);
-    font-weight: 800;
-    letter-spacing: -0.045em;
+.login-cover-content:focus-visible {
+    outline: 4px solid #176b52;
+    outline-offset: -8px;
 }
 
 .login-cover-subtitle {
-    margin-bottom: 1.75rem;
-    color: rgba(255, 255, 255, 0.75);
+    color: #51685e;
     font-size: 1rem;
 }
 
 .login-reveal-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     min-width: 170px;
     min-height: 52px;
     padding-inline: 1.5rem;
@@ -1052,17 +1058,12 @@ body.bg-light {
     transition: transform 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-.login-reveal-btn:hover {
+.login-cover-content:hover .login-reveal-btn {
     transform: translateY(-2px);
     background: #f8e6b2;
     border-color: #f8e6b2;
     color: #103f34;
     box-shadow: 0 12px 30px rgba(5, 35, 25, 0.24);
-}
-
-.login-reveal-btn:focus-visible {
-    outline: 3px solid #fff;
-    outline-offset: 4px;
 }
 
 .login-reveal-ready.login-reveal-closed .login-form-panel {
@@ -1085,7 +1086,6 @@ body.bg-light {
 
 .login-reveal-ready.login-reveal-open .login-cover-content {
     opacity: 0;
-    transform: translateY(clamp(-9rem, -18vh, -5rem)) scale(0.92);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1103,13 +1103,19 @@ body.bg-light {
 }
 
 @media (max-width: 575.98px) {
-    .login-cover-emblem {
-        width: 112px;
-        height: 112px;
-        font-size: 4.5rem;
+    .login-cover-content {
+        padding: 1.5rem 0.75rem 2rem;
+    }
+}
+
+@media (max-height: 650px) and (min-width: 576px) {
+    .login-stage {
+        max-height: calc(100dvh - 2rem);
+        overflow-x: hidden;
+        overflow-y: auto;
     }
 
-    .login-cover-content {
-        padding: 1.5rem 0.75rem;
+    .login-cover-half-image {
+        object-position: center 18%;
     }
 }

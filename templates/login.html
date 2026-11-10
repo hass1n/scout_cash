@@ -79,16 +79,18 @@
         </section>
 
         <div class="login-cover" id="loginCover" aria-label="Scout Treasury sign in" aria-hidden="false">
-            <div class="login-cover-half login-cover-half-left" aria-hidden="true"></div>
-            <div class="login-cover-half login-cover-half-right" aria-hidden="true"></div>
-            <div class="login-cover-content">
-                <span class="login-cover-emblem" aria-hidden="true">⚜️</span>
-                <h1 class="login-cover-title">Scout Treasury</h1>
-                <p class="login-cover-subtitle">Your troop funds, in good hands.</p>
-                <button class="btn login-reveal-btn" type="button" id="showLogin">
-                    <i class="fa-solid fa-right-to-bracket me-2" aria-hidden="true"></i>Sign In
-                </button>
+            <div class="login-cover-half login-cover-half-left" aria-hidden="true">
+                <img class="login-cover-half-image" src="{{ url_for('static', filename='images/scout-logo.png') }}" alt="">
             </div>
+            <div class="login-cover-half login-cover-half-right" aria-hidden="true">
+                <img class="login-cover-half-image" src="{{ url_for('static', filename='images/scout-logo.png') }}" alt="">
+            </div>
+            <button class="login-cover-content" type="button" id="showLogin" aria-label="Open the sign-in form">
+                <span class="login-cover-subtitle">Your troop funds, in good hands.</span>
+                <span class="login-reveal-btn">
+                    <i class="fa-solid fa-right-to-bracket me-2" aria-hidden="true"></i>Sign In
+                </span>
+            </button>
         </div>
     </div>
 </div>
@@ -116,6 +118,7 @@
             loginFormPanel.removeAttribute('aria-hidden');
             loginFormPanel.inert = false;
             loginCover.setAttribute('aria-hidden', 'true');
+            loginCover.inert = true;
             document.getElementById('email').focus({ preventScroll: true });
         });
     }

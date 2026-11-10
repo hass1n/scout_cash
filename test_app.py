@@ -222,6 +222,7 @@ class ScoutFinanceTestCase(unittest.TestCase):
         self.assertIn(b'<html lang="ar" dir="rtl">', response.data)
         self.assertIn(b'bootstrap.rtl.min.css', response.data)
         self.assertIn(b'js/i18n.js', response.data)
+        self.assertIn(b'images/scout-logo.png', response.data)
 
         with self.client.session_transaction() as browser_session:
             browser_session['user'] = AUTHORIZED_EMAIL
