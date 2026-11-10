@@ -6,11 +6,11 @@
 <div class="container-fluid px-lg-4 dashboard-page">
 
     <!-- Top Greeting & Header Bar -->
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4 d-print-none">
-        <div>
-            <h2 class="fw-bold mb-1 text-dark d-flex align-items-center gap-2">
-                <span>⚜️ Scout Treasury Overview</span>
-            </h2>
+    <div class="dashboard-header d-flex justify-content-between align-items-md-center gap-3 mb-4 d-print-none">
+        <div class="dashboard-heading-title">
+            <img class="dashboard-brand-logo"
+                 src="{{ url_for('static', filename='images/scout-logo.png') }}"
+                 alt="Scout troop treasury">
             <p class="text-muted mb-0 small">
                 Track income (من مين), manage expenses (لشو), and monitor real-time $ & ل.ل cash box balances.
             </p>

@@ -759,6 +759,36 @@ body.bg-light {
     border-radius: 1.25rem;
 }
 
+.dashboard-header {
+    flex-direction: column;
+}
+
+.dashboard-heading-title {
+    order: 1;
+    text-align: right;
+}
+
+.dashboard-brand-logo {
+    display: block;
+    width: min(100%, 300px);
+    height: auto;
+    margin-left: auto;
+}
+
+.dashboard-actions {
+    order: 2;
+}
+
+@media (min-width: 768px) {
+    .dashboard-header {
+        flex-direction: row-reverse;
+    }
+
+    [dir="rtl"] .dashboard-header {
+        flex-direction: row;
+    }
+}
+
 .dashboard-page h2,
 .users-page h2 {
     color: #183f33 !important;

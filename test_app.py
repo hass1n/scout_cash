@@ -149,7 +149,7 @@ class ScoutFinanceTestCase(unittest.TestCase):
         }, follow_redirects=True)
         self.assertEqual(res.status_code, 200)
         self.assertIn('أهلاً وسهلاً بك في صندوق فوج الدورة'.encode('utf-8'), res.data)
-        self.assertIn(b'Scout Treasury Overview', res.data)
+        self.assertIn(b'images/scout-logo.png', res.data)
         self.assertIn(b'$ Wallet', res.data)
         self.assertIn('ل.ل Wallet'.encode('utf-8'), res.data)
 
@@ -306,7 +306,7 @@ class UserAccountsTestCase(unittest.TestCase):
         # The approved user can sign in and use the dashboard, but not admin pages
         self.client.get('/logout')
         res = self.login('scout@example.com', 'secret1')
-        self.assertIn(b'Scout Treasury Overview', res.data)
+        self.assertIn(b'images/scout-logo.png', res.data)
         self.assertNotIn(b'href="/users"', res.data)
         self.assertEqual(self.client.get('/users').status_code, 403)
         res = self.client.post('/transaction/add', data={
@@ -360,7 +360,7 @@ class UserAccountsTestCase(unittest.TestCase):
 
         self.client.get('/logout')
         res = self.login('rami@example.com', 'camp2026')
-        self.assertIn(b'Scout Treasury Overview', res.data)
+        self.assertIn(b'images/scout-logo.png', res.data)
 
     def test_only_admin_can_manage_users(self):
         database.create_user('U', 'user@example.com', generate_password_hash('secret1'), status='approved')
