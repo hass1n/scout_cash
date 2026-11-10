@@ -169,8 +169,8 @@ body {
 }
 .scout-emblem-image {
     display: block;
-    width: 96px;
-    height: 96px;
+    width: 128px;
+    height: 128px;
     object-fit: contain;
     filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.2));
 }
@@ -746,7 +746,7 @@ body.bg-light {
 }
 
 .dashboard-page > .d-print-none:first-child {
-    padding: 1rem 1.25rem;
+    padding: 0.5rem 1rem;
     background: linear-gradient(115deg, #e8f1ec 0%, #f5f7ef 70%, #f7f1df 100%);
     border: 1px solid #dce8df;
     border-radius: 1.25rem;
@@ -757,15 +757,15 @@ body.bg-light {
 }
 
 .dashboard-heading-title {
-    flex: 0 1 360px;
-    max-width: 360px;
+    flex: 0 1 270px;
+    max-width: 270px;
     order: 1;
     text-align: right;
 }
 
 .dashboard-brand-logo {
     display: block;
-    width: min(100%, 240px);
+    width: min(100%, 220px);
     height: auto;
     margin-left: auto;
 }
@@ -933,7 +933,7 @@ body.bg-light {
 
 @media (max-width: 575.98px) {
     .dashboard-page > .d-print-none:first-child {
-        padding: 1.25rem;
+        padding: 0.5rem 0.75rem;
         border-radius: 1rem;
     }
 
