@@ -1074,6 +1074,7 @@ body.bg-light {
 
 .login-reveal-ready.login-reveal-open .login-cover {
     pointer-events: none;
+    background: transparent;
 }
 
 .login-reveal-ready.login-reveal-open .login-cover-half-left {
@@ -1105,17 +1106,5 @@ body.bg-light {
 @media (max-width: 575.98px) {
     .login-cover-content {
         padding: 1.5rem 0.75rem 2rem;
-    }
-}
-
-@media (max-height: 650px) and (min-width: 576px) {
-    .login-stage {
-        max-height: calc(100dvh - 2rem);
-        overflow-x: hidden;
-        overflow-y: auto;
-    }
-
-    .login-cover-half-image {
-        object-position: center 18%;
     }
 }
