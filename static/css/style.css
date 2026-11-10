@@ -1125,11 +1125,11 @@ body.bg-light {
     --lbp-color: #c65e1b;
     --bs-primary: #dc6f21;
     --bs-primary-rgb: 220, 111, 33;
-    background: #fff4e8 !important;
+    background: #fff !important;
 }
 
 .dashboard-body .main-wrapper {
-    background: #fff4e8;
+    background: #fff;
 }
 
 .dashboard-body .scout-navbar {
@@ -1139,8 +1139,8 @@ body.bg-light {
 }
 
 .dashboard-body .dashboard-page > .d-print-none:first-child {
-    background: linear-gradient(115deg, #fff1df 0%, #ffe8ce 70%, #ffdfb8 100%);
-    border-color: #f3d2b5;
+    background: #fff;
+    border-color: #e4ebe5;
 }
 
 .dashboard-body .dashboard-page h2 {
@@ -1148,22 +1148,22 @@ body.bg-light {
 }
 
 .dashboard-body .dashboard-page .card {
-    background-color: #fffaf5;
-    border-color: #f0d7c0 !important;
+    background-color: #fff;
+    border-color: #e4ebe5 !important;
 }
 
 .dashboard-body .dashboard-page .card-header,
 .dashboard-body .dashboard-page .bg-white {
-    background-color: #fff4e8 !important;
+    background-color: #fff !important;
 }
 
 .dashboard-body .dashboard-page .bg-light {
-    background-color: #ffedd5 !important;
+    background-color: #fff !important;
 }
 
 .dashboard-body .wallet-card,
 .dashboard-body .wallet-lbp {
-    background: linear-gradient(145deg, #fffaf5 0%, #ffedd5 100%);
+    background: #fff;
     border-top-color: #e78332 !important;
 }
 
@@ -1172,17 +1172,13 @@ body.bg-light {
 .dashboard-body .bg-usd-pill,
 .dashboard-body .bg-lbp-pill,
 .dashboard-body .badge-income,
-.dashboard-body .badge-expense,
 .dashboard-body .bg-success,
-.dashboard-body .bg-success-subtle,
-.dashboard-body .bg-danger,
-.dashboard-body .bg-danger-subtle {
+.dashboard-body .bg-success-subtle {
     background-color: #ffedd5 !important;
     color: #a64e16 !important;
 }
 
-.dashboard-body .badge-income,
-.dashboard-body .badge-expense {
+.dashboard-body .badge-income {
     border-color: #f3c89f;
 }
 
@@ -1194,27 +1190,29 @@ body.bg-light {
     color: #bd5716 !important;
 }
 
+.dashboard-body .text-danger {
+    color: #b91c1c !important;
+}
+
 .dashboard-body .transaction-table thead th,
 .dashboard-body .table-light th {
-    background-color: #ffe4c2;
-    border-color: #f0d1b3;
+    background-color: #f8fafc;
+    border-color: #e2e8f0;
 }
 
 .dashboard-body .transaction-table tbody tr:hover {
-    background-color: #fff0dd;
+    background-color: #f8fafc;
 }
 
 .dashboard-body .period-summary-banner {
-    background: #ffedd5;
-    border-color: #f0d1b3 !important;
+    background: #fff;
+    border-color: #e2e8f0 !important;
 }
 
 .dashboard-body .dashboard-page .btn-outline-success,
 .dashboard-body .dashboard-page .btn-outline-primary,
 .dashboard-body .btn-outline-success,
-.dashboard-body .btn-outline-primary,
-.dashboard-body .btn-outline-danger,
-.dashboard-body .btn-outline-danger-scout {
+.dashboard-body .btn-outline-primary {
     --bs-btn-color: #a64e16;
     --bs-btn-border-color: #e8ad78;
     --bs-btn-hover-color: #84370b;
@@ -1225,19 +1223,20 @@ body.bg-light {
     --bs-btn-active-border-color: #dc6f21;
 }
 
-.dashboard-body .text-danger {
-    color: #a64e16 !important;
+.dashboard-body .dashboard-page .btn-outline-danger-scout {
+    background-color: #fff;
+    border-color: #e5b7b2;
+    color: #a63e39;
 }
 
-.dashboard-body .badge.bg-dark,
-.dashboard-body .modal-header.bg-dark {
-    background-color: #a64e16 !important;
+.dashboard-body .dashboard-page .btn-outline-danger-scout:hover {
+    background-color: #fff2f0;
+    border-color: #d88c84;
+    color: #8f302c;
 }
 
 .dashboard-body .btn-scout-accent,
-.dashboard-body .bg-scout-income,
-.dashboard-body .bg-scout-expense,
-.dashboard-body .modal-header {
+.dashboard-body .bg-scout-income {
     background: linear-gradient(110deg, #c65e1b 0%, #e78332 100%);
     border-color: #dc6f21;
 }
@@ -1248,27 +1247,27 @@ body.bg-light {
 }
 
 .dashboard-body .modal-content {
-    background-color: #fffaf5;
+    background-color: #fff;
 }
 
 .dashboard-body .dropdown-menu,
 .dashboard-body .modal-body,
 .dashboard-body .modal-footer,
 .dashboard-body .alert-success {
-    background-color: #fff4e8;
+    background-color: #fff;
 }
 
 .dashboard-body .table-light {
-    --bs-table-bg: #ffe4c2;
+    --bs-table-bg: #f8fafc;
 }
 
 .dashboard-body .table {
-    --bs-table-bg: #fffaf5;
-    --bs-table-hover-bg: #fff0dd;
-    --bs-table-color: #433124;
+    --bs-table-bg: #fff;
+    --bs-table-hover-bg: #f8fafc;
+    --bs-table-color: #23332d;
 }
 
 .dashboard-body .footer {
-    background: #fff1df !important;
-    border-top-color: #f3d2b5 !important;
+    background: #fff !important;
+    border-top-color: #e1e9e2 !important;
 }
