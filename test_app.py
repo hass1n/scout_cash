@@ -148,6 +148,7 @@ class ScoutFinanceTestCase(unittest.TestCase):
             'password': AUTHORIZED_PASSWORD
         }, follow_redirects=True)
         self.assertEqual(res.status_code, 200)
+        self.assertIn(b'<body class="bg-light dashboard-body">', res.data)
         self.assertIn('أهلاً وسهلاً بك في صندوق فوج الدورة'.encode('utf-8'), res.data)
         self.assertIn(b'images/scout-logo.png', res.data)
         self.assertIn(b'$ Wallet', res.data)
@@ -220,6 +221,7 @@ class ScoutFinanceTestCase(unittest.TestCase):
 
         response = self.client.get('/login')
         self.assertIn(b'<html lang="ar" dir="rtl">', response.data)
+        self.assertIn(b'<body class="bg-light">', response.data)
         self.assertIn(b'bootstrap.rtl.min.css', response.data)
         self.assertIn(b'js/i18n.js', response.data)
         self.assertIn(b'images/scout-logo.png', response.data)

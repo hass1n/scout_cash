@@ -1115,3 +1115,160 @@ body.bg-light {
         padding: 1.5rem 0.75rem 2rem;
     }
 }
+
+.dashboard-body {
+    --scout-primary: #dc6f21;
+    --scout-primary-dark: #bd5716;
+    --scout-secondary: #e78332;
+    --income-color: #dc6f21;
+    --usd-color: #dc6f21;
+    --lbp-color: #c65e1b;
+    --bs-primary: #dc6f21;
+    --bs-primary-rgb: 220, 111, 33;
+    background: #fff4e8 !important;
+}
+
+.dashboard-body .main-wrapper {
+    background: #fff4e8;
+}
+
+.dashboard-body .scout-navbar {
+    background: linear-gradient(110deg, #bd5716 0%, #dc6f21 65%, #e78332 100%);
+    border-bottom-color: #f4b77c;
+    box-shadow: 0 8px 26px rgba(151, 59, 12, 0.16);
+}
+
+.dashboard-body .dashboard-page > .d-print-none:first-child {
+    background: linear-gradient(115deg, #fff1df 0%, #ffe8ce 70%, #ffdfb8 100%);
+    border-color: #f3d2b5;
+}
+
+.dashboard-body .dashboard-page h2 {
+    color: #8f3d0c !important;
+}
+
+.dashboard-body .dashboard-page .card {
+    background-color: #fffaf5;
+    border-color: #f0d7c0 !important;
+}
+
+.dashboard-body .dashboard-page .card-header,
+.dashboard-body .dashboard-page .bg-white {
+    background-color: #fff4e8 !important;
+}
+
+.dashboard-body .dashboard-page .bg-light {
+    background-color: #ffedd5 !important;
+}
+
+.dashboard-body .wallet-card,
+.dashboard-body .wallet-lbp {
+    background: linear-gradient(145deg, #fffaf5 0%, #ffedd5 100%);
+    border-top-color: #e78332 !important;
+}
+
+.dashboard-body .usd-circle,
+.dashboard-body .lbp-circle,
+.dashboard-body .bg-usd-pill,
+.dashboard-body .bg-lbp-pill,
+.dashboard-body .badge-income,
+.dashboard-body .badge-expense,
+.dashboard-body .bg-success,
+.dashboard-body .bg-success-subtle,
+.dashboard-body .bg-danger,
+.dashboard-body .bg-danger-subtle {
+    background-color: #ffedd5 !important;
+    color: #a64e16 !important;
+}
+
+.dashboard-body .badge-income,
+.dashboard-body .badge-expense {
+    border-color: #f3c89f;
+}
+
+.dashboard-body .dashboard-page .wallet-amount,
+.dashboard-body .dashboard-page .wallet-amount.text-success,
+.dashboard-body .dashboard-page .wallet-amount.text-primary,
+.dashboard-body .text-success,
+.dashboard-body .text-primary {
+    color: #bd5716 !important;
+}
+
+.dashboard-body .transaction-table thead th,
+.dashboard-body .table-light th {
+    background-color: #ffe4c2;
+    border-color: #f0d1b3;
+}
+
+.dashboard-body .transaction-table tbody tr:hover {
+    background-color: #fff0dd;
+}
+
+.dashboard-body .period-summary-banner {
+    background: #ffedd5;
+    border-color: #f0d1b3 !important;
+}
+
+.dashboard-body .dashboard-page .btn-outline-success,
+.dashboard-body .dashboard-page .btn-outline-primary,
+.dashboard-body .btn-outline-success,
+.dashboard-body .btn-outline-primary,
+.dashboard-body .btn-outline-danger,
+.dashboard-body .btn-outline-danger-scout {
+    --bs-btn-color: #a64e16;
+    --bs-btn-border-color: #e8ad78;
+    --bs-btn-hover-color: #84370b;
+    --bs-btn-hover-bg: #ffdfb8;
+    --bs-btn-hover-border-color: #dc6f21;
+    --bs-btn-active-color: #84370b;
+    --bs-btn-active-bg: #ffdfb8;
+    --bs-btn-active-border-color: #dc6f21;
+}
+
+.dashboard-body .text-danger {
+    color: #a64e16 !important;
+}
+
+.dashboard-body .badge.bg-dark,
+.dashboard-body .modal-header.bg-dark {
+    background-color: #a64e16 !important;
+}
+
+.dashboard-body .btn-scout-accent,
+.dashboard-body .bg-scout-income,
+.dashboard-body .bg-scout-expense,
+.dashboard-body .modal-header {
+    background: linear-gradient(110deg, #c65e1b 0%, #e78332 100%);
+    border-color: #dc6f21;
+}
+
+.dashboard-body .btn-scout-accent:hover {
+    background: #bd5716;
+    border-color: #bd5716;
+}
+
+.dashboard-body .modal-content {
+    background-color: #fffaf5;
+}
+
+.dashboard-body .dropdown-menu,
+.dashboard-body .modal-body,
+.dashboard-body .modal-footer,
+.dashboard-body .alert-success {
+    background-color: #fff4e8;
+}
+
+.dashboard-body .table-light {
+    --bs-table-bg: #ffe4c2;
+}
+
+.dashboard-body .table {
+    --bs-table-bg: #fffaf5;
+    --bs-table-hover-bg: #fff0dd;
+    --bs-table-color: #433124;
+}
+
+.dashboard-body .footer {
+    background: #fff1df !important;
+    border-top-color: #f3d2b5 !important;
+}
