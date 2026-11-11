@@ -139,7 +139,8 @@ class ScoutFinanceTestCase(unittest.TestCase):
         self.assertIn(b'Music', res.data)
         self.assertIn(b'Campings', res.data)
         self.assertNotIn(b'Where would you like to go?', res.data)
-        self.assertIn(b'scout-logo.png', res.data)
+        self.assertIn(b'class="scout-navbar-home-emblem"', res.data)
+        self.assertNotIn(b'scout-logo.png', res.data)
         self.assertIn(b'scout-emblem.png', res.data)
         volunteer_page = self.client.get('/volunteer/register')
         self.assertIn(b'Volunteer with our troop', volunteer_page.data)
@@ -164,6 +165,12 @@ class ScoutFinanceTestCase(unittest.TestCase):
         login_page = secretary_client.get(secretary_response.headers['Location'])
         self.assertIn(b'name="next" value="/secretary"', login_page.data)
         login_page.close()
+        arabic_secretary_client = app.test_client()
+        arabic_secretary_client.get('/language/ar?next=%2F')
+        arabic_login_page = arabic_secretary_client.get('/login?next=/secretary')
+        self.assertIn('أمانة سر الكشافة'.encode('utf-8'), arabic_login_page.data)
+        self.assertNotIn('صندوق الكشاف'.encode('utf-8'), arabic_login_page.data)
+        arabic_login_page.close()
         login_response = secretary_client.post('/login', data={
             'email': AUTHORIZED_EMAIL,
             'password': AUTHORIZED_PASSWORD,
@@ -471,7 +478,8 @@ class UserAccountsTestCase(unittest.TestCase):
 
         self.login(AUTHORIZED_EMAIL, AUTHORIZED_PASSWORD)
         secretary_page = self.client.get('/secretary')
-        self.assertIn(b'class="scout-navbar-wordmark"', secretary_page.data)
+        self.assertNotIn(b'class="scout-navbar-wordmark"', secretary_page.data)
+        self.assertNotIn(b'class="scout-navbar-emblem"', secretary_page.data)
         self.assertIn(b'Volunteer applications', secretary_page.data)
         self.assertIn(b'Sam Scout', secretary_page.data)
         self.assertIn(b'sam.scout@example.com', secretary_page.data)

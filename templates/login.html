@@ -4,14 +4,26 @@
 
 {% block content %}
 <div class="login-page">
-    <div class="login-card login-stage card border-0 shadow-lg rounded-4 overflow-hidden" id="loginStage">
-        <section class="login-form-panel" id="loginFormPanel" aria-labelledby="loginTitle">
-            <div class="login-header text-center p-4 p-md-5 text-white">
+    <div class="login-card card border-0 shadow-lg rounded-4 overflow-hidden">
+        <section aria-labelledby="loginTitle">
+            <div class="login-header text-center text-white">
                 <img class="scout-emblem-image mx-auto mb-3"
                      src="{{ url_for('static', filename='images/scout-emblem.png') }}"
                      alt="Scout troop emblem">
-                <h2 class="fw-bold mb-1" id="loginTitle">Scout Treasury</h2>
-                <p class="text-white-50 mb-0">صندوق الكشاف &bull; Money Management</p>
+                <h2 class="fw-bold mb-1" id="loginTitle">
+                    {% if login_next == url_for('secretary') %}
+                        {{ 'أمانة سر الكشافة' if language == 'ar' else 'Dawra Troop Secretary' }}
+                    {% else %}
+                        Scout Treasury
+                    {% endif %}
+                </h2>
+                <p class="text-white-50 mb-0">
+                    {% if login_next == url_for('secretary') and language == 'ar' %}
+                    فوج الدورة
+                    {% else %}
+                    صندوق الكشاف &bull; Money Management
+                    {% endif %}
+                </p>
             </div>
 
             <div class="card-body p-4 p-md-5 bg-white">
@@ -81,50 +93,15 @@
             </div>
         </section>
 
-        <div class="login-cover" id="loginCover" aria-label="Scout Treasury sign in" aria-hidden="false">
-            <div class="login-cover-half login-cover-half-left" aria-hidden="true">
-                <img class="login-cover-half-image" src="{{ url_for('static', filename='images/scout-logo.png') }}" alt="">
-            </div>
-            <div class="login-cover-half login-cover-half-right" aria-hidden="true">
-                <img class="login-cover-half-image" src="{{ url_for('static', filename='images/scout-logo.png') }}" alt="">
-            </div>
-            <button class="login-cover-content" type="button" id="showLogin" aria-label="Open the sign-in form">
-                <span class="login-cover-subtitle">Your troop funds, in good hands.</span>
-                <span class="login-reveal-btn">
-                    <i class="fa-solid fa-right-to-bracket me-2" aria-hidden="true"></i>Sign In
-                </span>
-            </button>
-        </div>
     </div>
 </div>
 {% endblock %}
 
 {% block extra_scripts %}
 <script>
-    const loginStage = document.getElementById('loginStage');
-    const loginFormPanel = document.getElementById('loginFormPanel');
-    const loginCover = document.getElementById('loginCover');
-    const showLoginButton = document.getElementById('showLogin');
     const toggleBtn = document.getElementById('togglePassword');
     const pwdInput = document.getElementById('password');
     const eyeIcon = document.getElementById('eyeIcon');
-
-    if (loginStage && loginFormPanel && loginCover && showLoginButton) {
-        loginStage.classList.add('login-reveal-ready', 'login-reveal-closed');
-        loginFormPanel.setAttribute('aria-hidden', 'true');
-        loginCover.setAttribute('aria-hidden', 'false');
-        loginFormPanel.inert = true;
-
-        showLoginButton.addEventListener('click', function () {
-            loginStage.classList.remove('login-reveal-closed');
-            loginStage.classList.add('login-reveal-open');
-            loginFormPanel.removeAttribute('aria-hidden');
-            loginFormPanel.inert = false;
-            loginCover.setAttribute('aria-hidden', 'true');
-            loginCover.inert = true;
-            document.getElementById('email').focus();
-        });
-    }
 
     if (toggleBtn && pwdInput) {
         toggleBtn.addEventListener('click', function() {
