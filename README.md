@@ -2,7 +2,7 @@
 
 A Flask web application designed for Scout group treasury management, tracking **Incomes (واردات)**, **Expenses (مصاريف)**, and live cash box balances across dual currencies: **USD ($)** and **Lebanese Pounds (LBP / ل.ل)**.
 
-The public home page introduces **National Education Scouts – Dawra Troop** and provides separate entry points for the Treasury and the troop Secretary correspondence tool.
+The public home page introduces **National Education Scouts – Dawra Troop** and highlights troop events, identity, music, and camps. The shared navigation links to Home, Secretary, and Treasury.
 
 ---
 
@@ -51,9 +51,13 @@ Default local administrator credentials:
    - Switch between English and Arabic from the language control on any page.
    - Arabic mode translates the interface and uses right-to-left layout; English mode uses left-to-right layout.
 8. **Troop Home & Secretary Portal**:
-   - The public home page introduces the troop and links to its Treasury and official correspondence tools.
+   - The public home page introduces the troop and highlights its events, identity, music, and camps.
    - The Secretary page is restricted to the configured admin email (`ADMIN_EMAIL`); other signed-in accounts are denied.
    - Secretary letters and signature settings are stored in the browser used to create them, not in the server database.
+9. **Volunteer Applications**:
+   - Volunteers can submit their full name, email or phone, and date of birth through the public registration page.
+   - Only the configured admin can view applications and accept or decline them in the Secretary workspace.
+   - Volunteer application details are stored in the application database and are visible only to the authorized admin.
 
 ---
 
@@ -83,7 +87,7 @@ Default local administrator credentials:
    - Email: `sahmarany.hassan11@gmail.com`
    - Password: `1234`
 
-The Secretary portal is available at `/secretary` only to the configured admin email.
+The Secretary portal is available at `/secretary` only to the configured admin email. The volunteer registration form is available from the home page and at `/volunteer/register`; authorized admins review submissions in the Secretary workspace.
 
 ---
 
@@ -96,6 +100,7 @@ The repo includes a `render.yaml` Blueprint that creates a web service plus a Po
 3. Render sets `DATABASE_URL` and `SECRET_KEY` automatically.
 
 When `DATABASE_URL` is set the app stores data in PostgreSQL; otherwise it uses the local `scout_finance.db` SQLite file.
+Volunteer applications are stored alongside the app data. Secretary letters and signature settings remain in the browser's local database, as in the supplied correspondence tool.
 
 ---
 

@@ -13,6 +13,14 @@
                  alt="Scout troop treasury">
         </div>
         <div class="dashboard-actions d-flex align-items-center gap-2 flex-wrap">
+            {% if is_admin %}
+            <a href="{{ url_for('users') }}" class="btn btn-outline-primary bg-white shadow-sm">
+                <i class="fa-solid fa-users me-1"></i> Manage Users
+                {% if pending_requests_count %}
+                <span class="badge rounded-pill bg-warning text-dark ms-1">{{ pending_requests_count }}</span>
+                {% endif %}
+            </a>
+            {% endif %}
             <!-- This Month Direct Quick Action -->
             <a href="{{ url_for('dashboard', preset='this_month') }}" 
                class="btn {% if preset == 'this_month' %}btn-primary shadow{% else %}btn-outline-primary bg-white shadow-sm{% endif %}">

@@ -17,23 +17,21 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css', v='22') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css', v='24') }}">
     {% block extra_head %}{% endblock %}
 </head>
-<body class="bg-light{% if request.endpoint == 'dashboard' %} dashboard-body{% endif %}">
+<body class="bg-light{% if request.endpoint in ('dashboard', 'secretary') %} dashboard-body{% endif %}">
 
-    {% if session.get('user') %}
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark scout-navbar shadow-sm sticky-top">
         <div class="container-fluid px-lg-4">
-            <a class="navbar-brand d-flex align-items-center gap-2" href="{{ url_for('home') }}">
-                <img class="scout-navbar-logo"
+            <a class="navbar-brand scout-navbar-brand d-flex align-items-center gap-2" href="{{ url_for('home') }}">
+                <img class="scout-navbar-wordmark"
+                     src="{{ url_for('static', filename='images/scout-logo.png') }}"
+                     alt="National Education Scouts">
+                <img class="scout-navbar-emblem"
                      src="{{ url_for('static', filename='images/scout-emblem.png') }}"
-                     alt="Scout emblem">
-                <div>
-                    <span class="fw-bold fs-5 tracking-tight">Scout Treasury</span>
-                    <span class="d-none d-sm-inline text-light-50 small ms-1">| صندوق الكشاف</span>
-                </div>
+                     alt="Dawra Troop emblem">
             </a>
             
             <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#scoutNav" aria-controls="scoutNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -48,32 +46,18 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {% if request.endpoint == 'dashboard' %}active{% endif %}" href="{{ url_for('dashboard') }}">
-                            <i class="fa-solid fa-vault me-1"></i> Treasury
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('dashboard', preset='this_month') }}">
-                            <i class="fa-solid fa-calendar-check me-1"></i> This Month
-                        </a>
-                    </li>
-                    {% if is_admin %}
-                    <li class="nav-item">
                         <a class="nav-link {% if request.endpoint == 'secretary' %}active{% endif %}" href="{{ url_for('secretary') }}">
                             <i class="fa-solid fa-file-signature me-1"></i> Secretary
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {% if request.endpoint == 'users' %}active{% endif %}" href="{{ url_for('users') }}">
-                            <i class="fa-solid fa-users me-1"></i> Users
-                            {% if pending_requests_count %}
-                            <span class="badge rounded-pill bg-warning text-dark ms-1">{{ pending_requests_count }}</span>
-                            {% endif %}
+                        <a class="nav-link {% if request.endpoint == 'dashboard' %}active{% endif %}" href="{{ url_for('dashboard') }}">
+                            <i class="fa-solid fa-vault me-1"></i> Treasury
                         </a>
                     </li>
-                    {% endif %}
                 </ul>
 
+                {% if session.get('user') and request.endpoint == 'dashboard' %}
                 <div class="navbar-actions d-flex align-items-center gap-2 flex-wrap">
                     <div class="dropdown ms-lg-2">
                         <button class="btn btn-scout-user btn-sm dropdown-toggle d-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -95,12 +79,12 @@
                         </ul>
                     </div>
                 </div>
+                {% endif %}
             </div>
         </div>
     </nav>
-    {% endif %}
 
-    {% if request.endpoint != 'home' %}
+    {% if request.endpoint not in ('home', 'volunteer_register') %}
     <div class="container-fluid px-lg-4 mt-2 d-flex justify-content-end language-switch d-print-none" aria-label="Language">
         <a class="btn btn-sm {% if language == 'en' %}btn-dark{% else %}btn-outline-secondary{% endif %}"
            href="{{ url_for('set_language', language='en', next=request.full_path.rstrip('?')) }}"

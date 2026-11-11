@@ -5,14 +5,6 @@
 {% block content %}
 <div class="home-page">
     <header class="home-topbar">
-        <a class="home-brand" href="{{ url_for('home') }}">
-            <img src="{{ url_for('static', filename='images/scout-emblem.png') }}"
-                 alt="{{ 'شعار كشاف التربية الوطنية' if language == 'ar' else 'National Education Scouts emblem' }}">
-            <span>
-                <strong>{{ 'كشاف التربية الوطنية' if language == 'ar' else 'National Education Scouts' }}</strong>
-                <small>{{ 'فوج الدورة' if language == 'ar' else 'Dawra Troop' }}</small>
-            </span>
-        </a>
         <nav class="home-language" aria-label="Language">
             <a class="{% if language == 'en' %}active{% endif %}"
                href="{{ url_for('set_language', language='en', next=url_for('home')) }}"
@@ -32,14 +24,14 @@
             {% if language == 'ar' %}
             <h1 id="homeTitle">على الدرب معاً،<br><span>مستعدّون لكل خير.</span></h1>
             <p>نؤمن بأن الكشاف مساحة للتعلّم والنمو وخدمة المجتمع. في فوج الدورة، نعمل بروح الفريق، ونشجّع المبادرة والقيادة، ونعيش قيم المسؤولية والاستعداد في كل يوم.</p>
-            <a class="home-primary-link" href="#workspaces">
-                اكتشف خدمات الفوج <i class="fa-solid fa-arrow-left"></i>
+            <a class="home-primary-link" href="#troop-life">
+                اكتشف حياة الفوج <i class="fa-solid fa-arrow-left"></i>
             </a>
             {% else %}
             <h1 id="homeTitle">Growing together.<br><span>Ready to do good.</span></h1>
             <p>Scouting is a place to learn, grow, and serve. In Dawra Troop, we encourage teamwork, initiative, and leadership—and put responsibility and preparedness into practice every day.</p>
-            <a class="home-primary-link" href="#workspaces">
-                Explore troop services <i class="fa-solid fa-arrow-right"></i>
+            <a class="home-primary-link" href="#troop-life">
+                Explore troop life <i class="fa-solid fa-arrow-right"></i>
             </a>
             {% endif %}
         </div>
@@ -76,63 +68,53 @@
         </article>
     </section>
 
-    <section class="home-workspaces" id="workspaces" aria-labelledby="workspacesTitle">
+    <section class="home-workspaces" id="troop-life" aria-labelledby="troopLifeTitle">
         <div class="home-section-heading">
             <div>
-                <span class="home-section-kicker">{{ 'بوابات الفوج' if language == 'ar' else 'TROOP PORTAL' }}</span>
-                <h2 id="workspacesTitle">{{ 'إلى أين تريد الذهاب؟' if language == 'ar' else 'Where would you like to go?' }}</h2>
+                <span class="home-section-kicker">{{ 'حياتنا الكشفية' if language == 'ar' else 'LIFE IN OUR TROOP' }}</span>
+                <h2 id="troopLifeTitle">{{ 'اكتشف فوج الدورة' if language == 'ar' else 'Discover Dawra Troop' }}</h2>
             </div>
-            <p>{{ 'اختر الخدمة التي تريد الوصول إليها.' if language == 'ar' else 'Choose a service to continue.' }}</p>
+            <p>{{ 'نتعلّم ونخدم ونصنع الذكريات معاً.' if language == 'ar' else 'Learning, serving, and making memories together.' }}</p>
         </div>
 
-        <div class="home-access-grid">
-            <article class="home-access-card home-treasury-card">
-                <span class="home-access-icon"><i class="fa-solid fa-vault"></i></span>
-                <div class="home-access-copy">
-                    <span class="home-card-kicker">{{ 'الإدارة المالية' if language == 'ar' else 'FINANCE' }}</span>
-                    <h3>{{ 'الخزينة' if language == 'ar' else 'Treasury' }}</h3>
-                    <p>{{ 'إدارة سجلات الواردات والمصروفات ومتابعة أرصدة الصندوق.' if language == 'ar' else 'Manage income and expense records and keep track of troop funds.' }}</p>
-                </div>
-                <a class="home-access-link" href="{{ url_for('dashboard') }}">
-                    {{ 'الدخول إلى الخزينة' if language == 'ar' else 'Open Treasury' }}
-                    <i class="fa-solid {% if language == 'ar' %}fa-arrow-left{% else %}fa-arrow-right{% endif %}"></i>
-                </a>
-                {% if not session.get('user') %}
-                <a class="home-request-link" href="{{ url_for('signup') }}">
-                    {{ 'طلب صلاحية الدخول' if language == 'ar' else 'Request access' }}
-                </a>
-                {% endif %}
+        <div class="home-topic-grid">
+            <article class="home-topic-card">
+                <span class="home-topic-icon"><i class="fa-solid fa-calendar-days"></i></span>
+                <span class="home-card-kicker">{{ 'معاً في الميدان' if language == 'ar' else 'TOGETHER IN ACTION' }}</span>
+                <h3>{{ 'فعالياتنا' if language == 'ar' else 'Our Events' }}</h3>
+                <p>{{ 'أنشطة ولقاءات كشفية تجمع أفراد الفوج وتحوّل التعلّم إلى تجارب ممتعة.' if language == 'ar' else 'Scout activities and gatherings that bring our troop together and turn learning into memorable experiences.' }}</p>
             </article>
-
-            <article class="home-access-card home-secretary-card">
-                <span class="home-access-icon"><i class="fa-solid fa-file-signature"></i></span>
-                <div class="home-access-copy">
-                    <span class="home-card-kicker">{{ 'المراسلات الرسمية' if language == 'ar' else 'CORRESPONDENCE' }}</span>
-                    <h3>{{ 'أمانة السر' if language == 'ar' else 'Secretary' }}</h3>
-                    <p>{{ 'إنشاء الكتب الرسمية وتنظيم المراسلات وأرشفتها.' if language == 'ar' else 'Prepare official letters, organize correspondence, and keep an archive.' }}</p>
-                </div>
-                {% if is_admin %}
-                <a class="home-access-link" href="{{ url_for('secretary') }}">
-                    {{ 'الدخول إلى أمانة السر' if language == 'ar' else 'Open Secretary' }}
-                    <i class="fa-solid {% if language == 'ar' %}fa-arrow-left{% else %}fa-arrow-right{% endif %}"></i>
-                </a>
-                {% elif session.get('user') %}
-                <span class="home-restricted-link" aria-label="{{ 'متاح للحساب المخوّل فقط' if language == 'ar' else 'Only available to the authorized account' }}">
-                    <i class="fa-solid fa-lock"></i>
-                    {{ 'متاح للحساب المخوّل فقط' if language == 'ar' else 'Authorized account only' }}
-                </span>
-                {% else %}
-                <a class="home-access-link" href="{{ url_for('secretary') }}">
-                    {{ 'تسجيل الدخول للحساب المخوّل' if language == 'ar' else 'Sign in to continue' }}
-                    <i class="fa-solid {% if language == 'ar' %}fa-arrow-left{% else %}fa-arrow-right{% endif %}"></i>
-                </a>
-                <span class="home-restricted-note">
-                    <i class="fa-solid fa-lock"></i>
-                    {{ 'متاحة لبريد المسؤول المعتمد فقط' if language == 'ar' else 'Restricted to the authorized admin email' }}
-                </span>
-                {% endif %}
+            <article class="home-topic-card">
+                <span class="home-topic-icon"><i class="fa-solid fa-compass"></i></span>
+                <span class="home-card-kicker">{{ 'من نحن' if language == 'ar' else 'OUR STORY' }}</span>
+                <h3>{{ 'من نحن' if language == 'ar' else 'About Us' }}</h3>
+                <p>{{ 'نحن كشاف التربية الوطنية – فوج الدورة؛ مجتمع يتعلّم فيه الفتية والشباب روح الخدمة والعمل الجماعي والقيادة.' if language == 'ar' else 'We are National Education Scouts, Dawra Troop—a community where young people learn service, teamwork, and leadership.' }}</p>
+            </article>
+            <article class="home-topic-card">
+                <span class="home-topic-icon"><i class="fa-solid fa-music"></i></span>
+                <span class="home-card-kicker">{{ 'صوت الفوج' if language == 'ar' else 'THE SOUND OF SCOUTING' }}</span>
+                <h3>{{ 'الموسيقى' if language == 'ar' else 'Music' }}</h3>
+                <p>{{ 'الأناشيد والإيقاع يضيفان الفرح والحماس إلى لقاءاتنا وأنشطتنا الكشفية.' if language == 'ar' else 'Songs and rhythm bring joy, energy, and a shared spirit to our Scout gatherings.' }}</p>
+            </article>
+            <article class="home-topic-card">
+                <span class="home-topic-icon"><i class="fa-solid fa-campground"></i></span>
+                <span class="home-card-kicker">{{ 'مغامرات في الطبيعة' if language == 'ar' else 'OUTDOOR ADVENTURES' }}</span>
+                <h3>{{ 'Campings' if language == 'en' else 'المخيّمات' }}</h3>
+                <p>{{ 'نتعلّم الاستعداد والاستقلالية واحترام الطبيعة من خلال التجارب الخارجية وروح الفريق.' if language == 'ar' else 'Outdoor experiences help us practise preparedness, independence, respect for nature, and teamwork.' }}</p>
             </article>
         </div>
+    </section>
+
+    <section class="home-volunteer-callout">
+        <span class="home-volunteer-icon"><i class="fa-solid fa-hands-holding-circle"></i></span>
+        <div>
+            <h2>{{ 'انضم إلى فريق المتطوعين' if language == 'ar' else 'Be part of our volunteer team' }}</h2>
+            <p>{{ 'شاركنا وقتك ومهاراتك وساهم في أنشطة فوج الدورة.' if language == 'ar' else 'Share your time and skills and help make troop activities happen.' }}</p>
+        </div>
+        <a class="home-access-link" href="{{ url_for('volunteer_register') }}">
+            {{ 'سجّل كمتطوّع' if language == 'ar' else 'Register to volunteer' }}
+            <i class="fa-solid {% if language == 'ar' %}fa-arrow-left{% else %}fa-arrow-right{% endif %}"></i>
+        </a>
     </section>
 
     <div class="home-closing">

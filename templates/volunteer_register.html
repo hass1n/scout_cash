@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}{{ 'التطوّع | فوج الدورة' if language == 'ar' else 'Volunteer Registration | Dawra Troop' }}{% endblock %}
+
+{% block content %}
+<div class="container volunteer-page">
+    <div class="volunteer-card">
+        <a class="volunteer-back" href="{{ url_for('home') }}">
+            <i class="fa-solid {% if language == 'ar' %}fa-arrow-right{% else %}fa-arrow-left{% endif %}"></i>
+            {{ 'العودة إلى الرئيسية' if language == 'ar' else 'Back to Home' }}
+        </a>
+        <div class="volunteer-heading">
+            <span class="volunteer-icon"><i class="fa-solid fa-hands-holding-circle"></i></span>
+            <span class="home-section-kicker">{{ 'كشاف التربية الوطنية · فوج الدورة' if language == 'ar' else 'NATIONAL EDUCATION SCOUTS · DAWRA TROOP' }}</span>
+            <h1>{{ 'سجّل اهتمامك بالتطوّع' if language == 'ar' else 'Volunteer with our troop' }}</h1>
+            <p>{{ 'أخبرنا قليلاً عنك، وسيراجع فريق الفوج طلبك.' if language == 'ar' else 'Tell us a little about yourself and our troop team will review your application.' }}</p>
+        </div>
+
+        <form method="post" class="volunteer-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <div class="mb-3">
+                <label for="full_name" class="form-label fw-semibold">{{ 'الاسم الكامل' if language == 'ar' else 'Full name' }}</label>
+                <input id="full_name" name="full_name" class="form-control" required maxlength="120"
+                       autocomplete="name" value="{{ form.full_name }}"
+                       placeholder="{{ 'اكتب اسمك الكامل' if language == 'ar' else 'Enter your full name' }}">
+            </div>
+            <div class="mb-3">
+                <label for="contact" class="form-label fw-semibold">{{ 'البريد الإلكتروني أو رقم الهاتف' if language == 'ar' else 'Email or phone number' }}</label>
+                <input id="contact" name="contact" class="form-control" required maxlength="254"
+                       value="{{ form.contact }}"
+                       placeholder="{{ 'name@example.com أو رقم الهاتف' if language == 'ar' else 'name@example.com or phone number' }}">
+            </div>
+            <div class="mb-4">
+                <label for="date_of_birth" class="form-label fw-semibold">{{ 'تاريخ الميلاد' if language == 'ar' else 'Date of birth' }}</label>
+                <input id="date_of_birth" name="date_of_birth" type="date" class="form-control" required
+                       max="{{ today }}" value="{{ form.date_of_birth }}">
+            </div>
+
+            <div class="volunteer-privacy">
+                <i class="fa-solid fa-shield-halved"></i>
+                {{ 'سنستخدم هذه المعلومات لمراجعة طلب التطوّع فقط، وستكون متاحة لمسؤولي الفوج المخوّلين.' if language == 'ar' else 'We will use this information to review your volunteer application. It will only be visible to authorized troop administrators.' }}
+            </div>
+
+            <button type="submit" class="btn btn-scout-primary w-100 py-3 fw-semibold">
+                {{ 'إرسال الطلب' if language == 'ar' else 'Submit application' }}
+                <i class="fa-solid fa-arrow-right ms-2"></i>
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

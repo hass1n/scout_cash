@@ -134,8 +134,23 @@ class ScoutFinanceTestCase(unittest.TestCase):
         res = self.client.get('/', follow_redirects=False)
         self.assertEqual(res.status_code, 200)
         self.assertIn(b'National Education Scouts', res.data)
-        self.assertIn(b'Treasury', res.data)
-        self.assertIn(b'Secretary', res.data)
+        self.assertIn(b'Our Events', res.data)
+        self.assertIn(b'About Us', res.data)
+        self.assertIn(b'Music', res.data)
+        self.assertIn(b'Campings', res.data)
+        self.assertNotIn(b'Where would you like to go?', res.data)
+        self.assertIn(b'scout-logo.png', res.data)
+        self.assertIn(b'scout-emblem.png', res.data)
+        volunteer_page = self.client.get('/volunteer/register')
+        self.assertIn(b'Volunteer with our troop', volunteer_page.data)
+        self.assertIn(b'name="date_of_birth"', volunteer_page.data)
+        self.assertEqual(volunteer_page.headers['Cache-Control'], 'no-store')
+        volunteer_page.close()
+        self.assertIn(b'href="/"', res.data)
+        self.assertIn(b'href="/secretary"', res.data)
+        self.assertIn(b'href="/treasury"', res.data)
+        self.assertNotIn(b'href="/treasury?preset=this_month"', res.data)
+        self.assertNotIn(b'href="/users"', res.data)
 
         # Treasury and Secretary each enforce their own sign-in requirements.
         res = self.client.get('/treasury', follow_redirects=False)
@@ -157,9 +172,24 @@ class ScoutFinanceTestCase(unittest.TestCase):
         self.assertEqual(login_response.headers['Location'], '/secretary')
         secretary_page = secretary_client.get('/secretary')
         self.assertEqual(secretary_page.status_code, 200)
-        self.assertIn('أمانة سر فوج الدورة'.encode('utf-8'), secretary_page.data)
+        self.assertIn(b'Dawra Troop Secretary', secretary_page.data)
+        self.assertIn('إنشاء كتاب رسمي'.encode('utf-8'), secretary_page.data)
+        self.assertIn(b'dir="rtl"', secretary_page.data)
+        self.assertIn(b'css/secretary.css', secretary_page.data)
         self.assertIn(b'href="/"', secretary_page.data)
+        self.assertNotIn(b'class="navbar-actions', secretary_page.data)
         secretary_page.close()
+        for asset in (
+            'static/css/secretary.css',
+            'static/js/secretary.js',
+            'static/fonts/aljazeera.ttf',
+            'static/fonts/sfkhaled.otf',
+            'static/images/secretary-letterhead.png',
+            'static/images/secretary-stamp.png',
+        ):
+            asset_response = secretary_client.get('/' + asset)
+            self.assertEqual(asset_response.status_code, 200, asset)
+            asset_response.close()
 
         # Attempt invalid login
         res = self.client.post('/login', data={
@@ -181,7 +211,8 @@ class ScoutFinanceTestCase(unittest.TestCase):
         self.assertEqual(res.status_code, 200)
         self.assertIn(b'<body class="bg-light dashboard-body">', res.data)
         self.assertIn('أهلاً وسهلاً بك في صندوق فوج الدورة'.encode('utf-8'), res.data)
-        self.assertIn(b'class="scout-navbar-logo"', res.data)
+        self.assertIn(b'class="scout-navbar-wordmark"', res.data)
+        self.assertIn(b'class="scout-navbar-emblem"', res.data)
         self.assertIn(b'images/scout-emblem.png', res.data)
         self.assertNotIn(b'+ Income (', res.data)
         self.assertNotIn(b'- Expense (', res.data)
@@ -385,6 +416,99 @@ class UserAccountsTestCase(unittest.TestCase):
         self.assertIn(b'already exists', self.signup().data)
         self.assertEqual(len(database.get_users()), 1)
 
+    def test_volunteer_registration_and_admin_review(self):
+        registration_page = self.client.get('/volunteer/register')
+        registration_page.close()
+        with self.client.session_transaction() as browser_session:
+            csrf_token = browser_session['csrf_token']
+
+        no_token = self.client.post('/volunteer/register', data={
+            'full_name': 'Sam Scout',
+            'contact': 'sam.scout@example.com',
+            'date_of_birth': '2002-05-14',
+        })
+        self.assertEqual(no_token.status_code, 400)
+
+        registration = self.client.post('/volunteer/register', data={
+            'full_name': 'Sam Scout',
+            'contact': 'sam.scout@example.com',
+            'date_of_birth': '2002-05-14',
+            'csrf_token': csrf_token,
+        }, follow_redirects=True)
+        self.assertIn(b'Your volunteer application has been sent', registration.data)
+        applications = database.get_volunteer_applications()
+        self.assertEqual(len(applications), 1)
+        application = applications[0]
+        self.assertEqual(
+            (application['full_name'], application['contact'], application['date_of_birth']),
+            ('Sam Scout', 'sam.scout@example.com', '2002-05-14'),
+        )
+        self.assertTrue(database.has_pending_volunteer_application('SAM.SCOUT@example.com'))
+
+        duplicate = self.client.post('/volunteer/register', data={
+            'full_name': 'Sam Scout',
+            'contact': 'SAM.SCOUT@example.com',
+            'date_of_birth': '2002-05-14',
+            'csrf_token': csrf_token,
+        })
+        self.assertIn(b'already awaiting review', duplicate.data)
+        phone_application = self.client.post('/volunteer/register', data={
+            'full_name': 'Jo Scout',
+            'contact': '+1 (555) 555-1234',
+            'date_of_birth': '2001-06-20',
+            'csrf_token': csrf_token,
+        }, follow_redirects=True)
+        self.assertIn(b'Your volunteer application has been sent', phone_application.data)
+        self.assertTrue(database.has_pending_volunteer_application('+1 (555) 555-1234'))
+        invalid = self.client.post('/volunteer/register', data={
+            'full_name': 'Future Scout',
+            'contact': '+1 555 555 5555',
+            'date_of_birth': '2999-01-01',
+            'csrf_token': csrf_token,
+        })
+        self.assertIn(b'cannot be in the future', invalid.data)
+        self.assertEqual(len(database.get_volunteer_applications()), 2)
+
+        self.login(AUTHORIZED_EMAIL, AUTHORIZED_PASSWORD)
+        secretary_page = self.client.get('/secretary')
+        self.assertIn(b'class="scout-navbar-wordmark"', secretary_page.data)
+        self.assertIn(b'Volunteer applications', secretary_page.data)
+        self.assertIn(b'Sam Scout', secretary_page.data)
+        self.assertIn(b'sam.scout@example.com', secretary_page.data)
+        self.assertIn(b'2002-05-14', secretary_page.data)
+        self.assertIn(b'Back to Home', secretary_page.data)
+        self.assertNotIn(b'href="/users"', secretary_page.data)
+        self.assertEqual(secretary_page.headers['Cache-Control'], 'no-store')
+        secretary_page.close()
+
+        missing_csrf = self.client.post(f"/volunteers/{application['id']}/accept")
+        self.assertEqual(missing_csrf.status_code, 400)
+
+        decision = self.client.post(
+            f"/volunteers/{application['id']}/accept",
+            data={'csrf_token': csrf_token},
+            follow_redirects=True,
+        )
+        self.assertIn(b'Volunteer application accepted', decision.data)
+        reviewed = next(
+            item for item in database.get_volunteer_applications()
+            if item['id'] == application['id']
+        )
+        self.assertEqual(reviewed['status'], 'accepted')
+        self.assertFalse(database.has_pending_volunteer_application('sam.scout@example.com'))
+        self.assertIsNone(database.get_user_by_email('sam.scout@example.com'))
+
+        # A reviewed application cannot be changed by submitting the decision again.
+        self.client.post(
+            f"/volunteers/{application['id']}/decline",
+            data={'csrf_token': csrf_token},
+        )
+        reviewed = next(
+            item for item in database.get_volunteer_applications()
+            if item['id'] == application['id']
+        )
+        self.assertEqual(reviewed['status'], 'accepted')
+
     def test_wrong_password_does_not_reveal_request_status(self):
         self.signup()
         res = self.login('scout@example.com', 'wrong-password')
@@ -409,9 +533,14 @@ class UserAccountsTestCase(unittest.TestCase):
 
     def test_only_admin_can_manage_users(self):
         database.create_user('U', 'user@example.com', generate_password_hash('secret1'), status='approved')
+        database.create_volunteer_application(
+            'Private Applicant', 'private@example.com', '2000-01-01'
+        )
         self.login('user@example.com', 'secret1')
         self.assertEqual(self.client.get('/users').status_code, 403)
         self.assertEqual(self.client.get('/secretary').status_code, 403)
+        self.assertNotIn(b'Private Applicant', self.client.get('/').data)
+        self.assertEqual(self.client.post('/volunteers/1/accept').status_code, 403)
         self.assertEqual(self.client.post('/users/create', data={
             'name': 'X', 'email': 'x@example.com', 'password': 'secret1'}).status_code, 403)
         pending_id = database.create_user('P', 'p@example.com', generate_password_hash('secret1'))

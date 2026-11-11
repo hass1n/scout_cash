@@ -1,13 +1,16 @@
 import csv
+import hmac
 import io
 import os
+import re
+import secrets
 from datetime import datetime, date
 from calendar import monthrange
 from functools import wraps
 
 from flask import (
     Flask, render_template, request, redirect,
-    url_for, session, flash, Response, jsonify, abort, send_file
+    url_for, session, flash, Response, jsonify, abort, make_response
 )
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -42,6 +45,12 @@ def current_owner():
 def current_language():
     language = session.get('language', 'en')
     return language if language in ('en', 'ar') else 'en'
+
+
+def get_csrf_token():
+    if 'csrf_token' not in session:
+        session['csrf_token'] = secrets.token_urlsafe(32)
+    return session['csrf_token']
 
 
 def login_required(f):
@@ -190,6 +199,71 @@ def signup():
         return redirect(url_for('login'))
 
     return render_template('signup.html', form=form)
+
+
+def validate_volunteer_application(full_name, contact, date_of_birth):
+    if not full_name or len(full_name) > 120:
+        return 'Please enter your full name (up to 120 characters).'
+    if not contact or len(contact) > 254:
+        return 'Please enter an email address or phone number.'
+    if '@' in contact:
+        if not re.fullmatch(r'[^@\s]+@[^@\s]+\.[^@\s]+', contact):
+            return 'Please enter a valid email address or phone number.'
+    else:
+        if not re.fullmatch(r'\+?[0-9][0-9\s().-]{5,24}', contact):
+            return 'Please enter a valid email address or phone number.'
+        if sum(character.isdigit() for character in contact) < 7:
+            return 'Please enter a valid email address or phone number.'
+    try:
+        birth_date = date.fromisoformat(date_of_birth)
+    except ValueError:
+        return 'Please enter a valid date of birth.'
+    if birth_date > date.today():
+        return 'Date of birth cannot be in the future.'
+    return None
+
+
+@app.route('/volunteer/register', methods=['GET', 'POST'])
+def volunteer_register():
+    form = {'full_name': '', 'contact': '', 'date_of_birth': ''}
+    if request.method == 'POST':
+        csrf_token = session.get('csrf_token')
+        if (
+            not csrf_token
+            or not hmac.compare_digest(
+                request.form.get('csrf_token', '').encode('utf-8'),
+                csrf_token.encode('utf-8'),
+            )
+        ):
+            abort(400)
+        form = {
+            'full_name': request.form.get('full_name', '').strip(),
+            'contact': request.form.get('contact', '').strip(),
+            'date_of_birth': request.form.get('date_of_birth', '').strip(),
+        }
+        error = validate_volunteer_application(**form)
+        if not error:
+            form['contact'] = (
+                form['contact'].lower() if '@' in form['contact'] else form['contact']
+            )
+            if database.has_pending_volunteer_application(form['contact']):
+                error = 'An application with this contact is already awaiting review.'
+
+        if error:
+            flash(error, 'danger')
+        else:
+            database.create_volunteer_application(**form)
+            flash('Thank you. Your volunteer application has been sent for review.', 'success')
+            return redirect(url_for('volunteer_register'))
+
+    response = make_response(render_template(
+        'volunteer_register.html',
+        form=form,
+        today=date.today().isoformat(),
+        csrf_token=get_csrf_token(),
+    ))
+    response.headers['Cache-Control'] = 'no-store'
+    return response
 
 
 def validate_new_account(name, email, password, confirm=None, password_required=True):
@@ -351,10 +425,43 @@ def home():
 @app.route('/secretary')
 @admin_required
 def secretary():
-    secretary_page = os.path.join(
-        os.path.dirname(__file__), 'private', 'secretary.html'
-    )
-    return send_file(secretary_page, mimetype='text/html', max_age=0)
+    applications = database.get_volunteer_applications()
+    response = make_response(render_template(
+        'secretary.html',
+        volunteer_applications=applications,
+        pending_volunteer_count=sum(
+            application['status'] == 'pending' for application in applications
+        ),
+        csrf_token=get_csrf_token(),
+    ))
+    response.headers['Cache-Control'] = 'no-store'
+    return response
+
+
+@app.route('/volunteers/<int:application_id>/<decision>', methods=['POST'])
+@admin_required
+def decide_volunteer(application_id, decision):
+    csrf_token = session.get('csrf_token')
+    if (
+        not csrf_token
+        or not hmac.compare_digest(
+            request.form.get('csrf_token', '').encode('utf-8'),
+            csrf_token.encode('utf-8'),
+        )
+    ):
+        abort(400)
+    if decision not in ('accept', 'decline'):
+        abort(404)
+    status = 'accepted' if decision == 'accept' else 'declined'
+    if not database.decide_volunteer_application(application_id, status):
+        flash('This volunteer application was already reviewed.', 'info')
+    else:
+        flash(
+            'Volunteer application accepted.' if status == 'accepted'
+            else 'Volunteer application declined.',
+            'success' if status == 'accepted' else 'info',
+        )
+    return redirect(url_for('secretary'))
 
 
 @app.route('/treasury')

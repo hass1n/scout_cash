@@ -79,6 +79,22 @@ def init_db(db_path=None):
         )
     ''')
     cursor.execute('CREATE INDEX IF NOT EXISTS idx_devices_email ON devices(email)')
+    cursor.execute(f'''
+        CREATE TABLE IF NOT EXISTS volunteer_applications (
+            id {'SERIAL PRIMARY KEY' if pg else 'INTEGER PRIMARY KEY AUTOINCREMENT'},
+            full_name TEXT NOT NULL,
+            contact TEXT NOT NULL,
+            date_of_birth TEXT NOT NULL,
+            status TEXT NOT NULL DEFAULT 'pending'
+                CHECK(status IN ('pending', 'accepted', 'declined')),
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            decided_at TIMESTAMP
+        )
+    ''')
+    cursor.execute(
+        'CREATE INDEX IF NOT EXISTS idx_volunteer_applications_status '
+        'ON volunteer_applications(status, created_at)'
+    )
     conn.commit()
     conn.close()
 
@@ -388,6 +404,66 @@ def count_pending_users(db_path=None):
     row = cursor.fetchone()
     conn.close()
     return int(row['n'])
+
+
+def create_volunteer_application(full_name, contact, date_of_birth, db_path=None):
+    conn = get_db_connection(db_path)
+    cursor = conn.cursor()
+    query = '''
+        INSERT INTO volunteer_applications (full_name, contact, date_of_birth)
+        VALUES (?, ?, ?)
+    '''
+    if _is_postgres(conn):
+        query += ' RETURNING id'
+    _execute(conn, cursor, query, (full_name.strip(), contact.strip(), date_of_birth))
+    application_id = cursor.fetchone()['id'] if _is_postgres(conn) else cursor.lastrowid
+    conn.commit()
+    conn.close()
+    return application_id
+
+
+def get_volunteer_applications(status=None, db_path=None):
+    conn = get_db_connection(db_path)
+    cursor = conn.cursor()
+    query = 'SELECT * FROM volunteer_applications'
+    params = []
+    if status:
+        query += ' WHERE status = ?'
+        params.append(status)
+    query += ' ORDER BY created_at DESC, id DESC'
+    _execute(conn, cursor, query, params)
+    rows = cursor.fetchall()
+    conn.close()
+    return [dict(row) for row in rows]
+
+
+def has_pending_volunteer_application(contact, db_path=None):
+    conn = get_db_connection(db_path)
+    cursor = conn.cursor()
+    _execute(conn, cursor, '''
+        SELECT 1 FROM volunteer_applications
+        WHERE lower(contact) = lower(?) AND status = 'pending'
+        LIMIT 1
+    ''', (contact.strip(),))
+    exists = cursor.fetchone() is not None
+    conn.close()
+    return exists
+
+
+def decide_volunteer_application(application_id, status, db_path=None):
+    if status not in ('accepted', 'declined'):
+        raise ValueError('Volunteer application status must be accepted or declined')
+    conn = get_db_connection(db_path)
+    cursor = conn.cursor()
+    _execute(conn, cursor, '''
+        UPDATE volunteer_applications
+        SET status = ?, decided_at = ?
+        WHERE id = ? AND status = 'pending'
+    ''', (status, datetime.now().strftime('%Y-%m-%d %H:%M:%S'), application_id))
+    conn.commit()
+    changed = cursor.rowcount > 0
+    conn.close()
+    return changed
 
 def update_user(id_, name, email, password_hash=None, db_path=None):
     """

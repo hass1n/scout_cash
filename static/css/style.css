@@ -683,9 +683,21 @@ body.bg-light {
     border-radius: 13px;
 }
 
-.scout-navbar-logo {
-    width: 60px;
-    height: 60px;
+.scout-navbar-brand {
+    padding: 0.25rem 0.55rem;
+    border-radius: 0.75rem;
+    background: rgba(255, 255, 255, 0.94);
+}
+
+.scout-navbar-wordmark {
+    width: 126px;
+    height: 46px;
+    object-fit: contain;
+}
+
+.scout-navbar-emblem {
+    width: 46px;
+    height: 46px;
     object-fit: contain;
 }
 
@@ -1650,6 +1662,288 @@ body.bg-light {
     color: #bd9b4e;
 }
 
+.home-topic-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+.home-topic-card {
+    min-height: 250px;
+    padding: 1.4rem;
+    border: 1px solid #e3ebe5;
+    border-top: 3px solid #d5ad53;
+    border-radius: 1.15rem;
+    background: #fff;
+    box-shadow: 0 8px 28px rgba(34, 69, 50, 0.055);
+}
+
+.home-topic-icon,
+.volunteer-icon {
+    display: grid;
+    place-items: center;
+    width: 48px;
+    height: 48px;
+    margin-bottom: 1rem;
+    border-radius: 15px;
+    background: #eaf3ed;
+    color: #1d7056;
+    font-size: 1.15rem;
+}
+
+.home-topic-card h3 {
+    margin: 0.35rem 0 0.55rem;
+    color: #193f32;
+    font-size: 1.25rem;
+    font-weight: 800;
+}
+
+.home-topic-card p {
+    margin: 0;
+    color: #718078;
+    font-size: 0.9rem;
+    line-height: 1.8;
+}
+
+.home-volunteer-callout {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 1.5rem;
+    padding: 1.4rem;
+    border: 1px solid #e4ebe5;
+    border-radius: 1.2rem;
+    background: linear-gradient(110deg, #f3f8f4, #fffaf0);
+}
+
+.home-volunteer-icon {
+    flex: 0 0 auto;
+    width: 54px;
+    height: 54px;
+    margin: 0;
+    background: #fbf3df;
+    color: #98752c;
+}
+
+.home-volunteer-callout > div {
+    flex: 1;
+}
+
+.home-volunteer-callout h2 {
+    margin: 0 0 0.25rem;
+    color: #193f32;
+    font-size: 1.1rem;
+    font-weight: 800;
+}
+
+.home-volunteer-callout p {
+    margin: 0;
+    color: #718078;
+}
+
+.volunteer-page {
+    max-width: 760px;
+}
+
+.volunteer-card {
+    padding: clamp(1.4rem, 5vw, 2.5rem);
+    border: 1px solid #e4ebe5;
+    border-top: 4px solid #d5ad53;
+    border-radius: 1.35rem;
+    background: #fff;
+    box-shadow: 0 10px 35px rgba(30, 65, 50, 0.08);
+}
+
+.volunteer-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    color: #486457;
+    font-size: 0.88rem;
+    text-decoration: none;
+}
+
+.volunteer-heading {
+    margin-bottom: 1.5rem;
+}
+
+.volunteer-icon {
+    width: 56px;
+    height: 56px;
+    background: #fbf3df;
+    color: #98752c;
+}
+
+.volunteer-heading .home-section-kicker {
+    letter-spacing: 0.04em;
+}
+
+.volunteer-heading h1 {
+    margin: 0.45rem 0;
+    color: #193f32;
+    font-size: clamp(1.6rem, 5vw, 2.2rem);
+    font-weight: 800;
+}
+
+.volunteer-heading p,
+.volunteer-privacy {
+    color: #718078;
+    line-height: 1.7;
+}
+
+.volunteer-privacy {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    margin-bottom: 1.25rem;
+    padding: 0.8rem;
+    border-radius: 0.75rem;
+    background: #f3f7f4;
+    font-size: 0.82rem;
+}
+
+.volunteer-privacy i {
+    margin-top: 0.2rem;
+    color: #1d7056;
+}
+
+.secretary-header {
+    direction: inherit;
+}
+
+.secretary-home-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.7rem 0.9rem;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    border-radius: 0.75rem;
+    background: rgba(255, 255, 255, 0.12);
+    color: #fff;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.secretary-home-button:hover {
+    background: rgba(255, 255, 255, 0.2);
+    color: #fff;
+}
+
+.secretary-pending-count {
+    display: inline-grid;
+    place-items: center;
+    min-width: 1.35rem;
+    height: 1.35rem;
+    margin-inline-start: 0.3rem;
+    padding: 0 0.3rem;
+    border-radius: 999px;
+    background: #b38732;
+    color: #fff;
+    font-size: 0.72rem;
+}
+
+.secretary-section-intro {
+    margin: -0.5rem 0 1rem;
+    color: #718078;
+}
+
+.secretary-applications {
+    display: grid;
+    gap: 0.75rem;
+}
+
+.secretary-application {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem;
+    border: 1px solid #e4ebe5;
+    border-radius: 0.85rem;
+    background: #fbfdfb;
+}
+
+.secretary-applicant-details h3 {
+    margin: 0 0 0.5rem;
+    color: #193f32;
+    font-size: 1rem;
+    font-weight: 800;
+}
+
+.secretary-applicant-details p {
+    margin: 0.2rem 0;
+    color: #65756c;
+    font-size: 0.85rem;
+}
+
+.secretary-applicant-details p i {
+    width: 1.2rem;
+    color: #1d7056;
+}
+
+.secretary-status {
+    display: inline-block;
+    margin-top: 0.55rem;
+    padding: 0.25rem 0.55rem;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 700;
+}
+
+.secretary-status-pending {
+    background: #fff3d4;
+    color: #7d5d19;
+}
+
+.secretary-status-accepted {
+    background: #e6f4eb;
+    color: #17653e;
+}
+
+.secretary-status-declined {
+    background: #fbe9e7;
+    color: #9c3932;
+}
+
+.secretary-application-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.secretary-application-actions form {
+    margin: 0;
+}
+
+.secretary-page .secretary-application-actions button {
+    padding: 0.55rem 0.75rem;
+    font-size: 0.8rem;
+}
+
+.secretary-page .secretary-accept-button {
+    background: #176b52;
+}
+
+.secretary-page .secretary-decline-button {
+    background: #fff;
+    color: #a63e39;
+    border: 1px solid #e5b7b2;
+}
+
+.secretary-empty-state {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1.25rem;
+    border: 1px dashed #d5e0d8;
+    border-radius: 0.8rem;
+    color: #718078;
+}
+
+.secretary-empty-state i {
+    color: #9aab9f;
+}
+
 @media (max-width: 767.98px) {
     .home-hero {
         grid-template-columns: 1fr;
@@ -1679,6 +1973,10 @@ body.bg-light {
     .home-section-heading {
         align-items: flex-start;
         flex-direction: column;
+    }
+
+    .home-topic-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 }
 
@@ -1711,6 +2009,37 @@ body.bg-light {
 
     .home-access-grid {
         grid-template-columns: 1fr;
+    }
+
+    .home-topic-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .home-topic-card {
+        min-height: 0;
+    }
+
+    .home-volunteer-callout,
+    .secretary-application {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .secretary-application-actions {
+        width: 100%;
+    }
+
+    .secretary-application-actions form,
+    .secretary-application-actions button {
+        flex: 1;
+    }
+
+    .secretary-page .grid {
+        grid-template-columns: 1fr;
+    }
+
+    .secretary-page .full {
+        grid-column: auto;
     }
 }
 
