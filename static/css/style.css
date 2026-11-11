@@ -724,9 +724,20 @@ body.bg-light {
 }
 
 .scout-navbar-home-emblem {
-    width: 54px;
-    height: 54px;
-    object-fit: contain;
+    display: block;
+    width: 72px;
+    height: 72px;
+    border: 2px solid rgba(255, 255, 255, 0.9);
+    border-radius: 50%;
+    background: #e85d20;
+    object-fit: cover;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.scout-navbar-home-brand {
+    padding: 0;
+    border-radius: 50%;
+    background: transparent;
 }
 
 .scout-navbar .navbar-nav {

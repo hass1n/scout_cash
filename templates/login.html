@@ -7,9 +7,11 @@
     <div class="login-card card border-0 shadow-lg rounded-4 overflow-hidden">
         <section aria-labelledby="loginTitle">
             <div class="login-header text-center text-white">
+                {% if login_next != url_for('secretary') %}
                 <img class="scout-emblem-image mx-auto mb-3"
                      src="{{ url_for('static', filename='images/scout-emblem.png') }}"
                      alt="Scout troop emblem">
+                {% endif %}
                 <h2 class="fw-bold mb-1" id="loginTitle">
                     {% if login_next == url_for('secretary') %}
                         {{ 'أمانة سر الكشافة' if language == 'ar' else 'Dawra Troop Secretary' }}

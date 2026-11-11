@@ -170,6 +170,7 @@ class ScoutFinanceTestCase(unittest.TestCase):
         arabic_login_page = arabic_secretary_client.get('/login?next=/secretary')
         self.assertIn('أمانة سر الكشافة'.encode('utf-8'), arabic_login_page.data)
         self.assertNotIn('صندوق الكشاف'.encode('utf-8'), arabic_login_page.data)
+        self.assertNotIn(b'class="scout-emblem-image', arabic_login_page.data)
         arabic_login_page.close()
         login_response = secretary_client.post('/login', data={
             'email': AUTHORIZED_EMAIL,
