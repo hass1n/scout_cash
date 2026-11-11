@@ -7,7 +7,7 @@ from functools import wraps
 
 from flask import (
     Flask, render_template, request, redirect,
-    url_for, session, flash, Response, jsonify, abort
+    url_for, session, flash, Response, jsonify, abort, send_file
 )
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -49,6 +49,8 @@ def login_required(f):
     def decorated_function(*args, **kwargs):
         if 'user' not in session:
             flash('Please sign in to access Scout Treasury.', 'warning')
+            if request.endpoint == 'secretary':
+                return redirect(url_for('login', next=request.path))
             return redirect(url_for('login'))
         if not is_admin():
             # The admin may have removed this account or changed its email since sign-in
@@ -113,6 +115,7 @@ def format_num_filter(amount):
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    login_next = request.values.get('next', '')
     if request.method == 'POST':
         email = request.form.get('email', '').strip().lower()
         password = request.form.get('password', '')
@@ -120,6 +123,8 @@ def login():
         if email == AUTHORIZED_EMAIL.lower() and password == AUTHORIZED_PASSWORD:
             session['user'] = AUTHORIZED_EMAIL
             flash('أهلاً وسهلاً بك في صندوق فوج الدورة', 'success')
+            if login_next == url_for('secretary'):
+                return redirect(url_for('secretary'))
             return redirect(url_for('dashboard'))
 
         user = database.get_user_by_email(email)
@@ -138,7 +143,11 @@ def login():
     if 'user' in session:
         return redirect(url_for('dashboard'))
 
-    return render_template('login.html', authorized_email=AUTHORIZED_EMAIL)
+    return render_template(
+        'login.html',
+        authorized_email=AUTHORIZED_EMAIL,
+        login_next=login_next if login_next == url_for('secretary') else '',
+    )
 
 
 @app.route('/signup', methods=['GET', 'POST'])
@@ -320,7 +329,7 @@ def set_language(language):
     next_url = request.args.get('next', '')
     if next_url.startswith('/') and not next_url.startswith('//'):
         return redirect(next_url)
-    return redirect(url_for('dashboard' if 'user' in session else 'login'))
+    return redirect(url_for('dashboard' if 'user' in session else 'home'))
 
 
 @app.route('/logout')
@@ -335,6 +344,20 @@ def logout():
 
 
 @app.route('/')
+def home():
+    return render_template('home.html')
+
+
+@app.route('/secretary')
+@admin_required
+def secretary():
+    secretary_page = os.path.join(
+        os.path.dirname(__file__), 'private', 'secretary.html'
+    )
+    return send_file(secretary_page, mimetype='text/html', max_age=0)
+
+
+@app.route('/treasury')
 @login_required
 def dashboard():
     today = date.today()

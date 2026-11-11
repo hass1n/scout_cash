@@ -2,10 +2,14 @@
 
 A Flask web application designed for Scout group treasury management, tracking **Incomes (واردات)**, **Expenses (مصاريف)**, and live cash box balances across dual currencies: **USD ($)** and **Lebanese Pounds (LBP / ل.ل)**.
 
+The public home page introduces **National Education Scouts – Dawra Troop** and provides separate entry points for the Treasury and the troop Secretary correspondence tool.
+
 ---
 
-## 🔐 Login Credentials
-Access is strictly restricted to the authorized leadership account:
+## 🔐 Access
+The troop home page is public. Treasury access requires an approved account, and the Secretary page is restricted to the configured admin email.
+
+Default local administrator credentials:
 - **Email:** `sahmarany.hassan11@gmail.com`
 - **Password:** `1234`
 
@@ -46,6 +50,10 @@ Access is strictly restricted to the authorized leadership account:
 7. **English & Arabic Interface**:
    - Switch between English and Arabic from the language control on any page.
    - Arabic mode translates the interface and uses right-to-left layout; English mode uses left-to-right layout.
+8. **Troop Home & Secretary Portal**:
+   - The public home page introduces the troop and links to its Treasury and official correspondence tools.
+   - The Secretary page is restricted to the configured admin email (`ADMIN_EMAIL`); other signed-in accounts are denied.
+   - Secretary letters and signature settings are stored in the browser used to create them, not in the server database.
 
 ---
 
@@ -66,14 +74,16 @@ Access is strictly restricted to the authorized leadership account:
    python app.py
    ```
 
-4. Open your browser and navigate to:
+4. Open the public troop home page:
    ```
    http://127.0.0.1:5000
    ```
 
-5. Sign in with:
+5. Choose **Treasury** to sign in, or visit `/treasury` directly. Sign in with:
    - Email: `sahmarany.hassan11@gmail.com`
    - Password: `1234`
+
+The Secretary portal is available at `/secretary` only to the configured admin email.
 
 ---
 

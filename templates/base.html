@@ -17,7 +17,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css', v='21') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css', v='22') }}">
     {% block extra_head %}{% endblock %}
 </head>
 <body class="bg-light{% if request.endpoint == 'dashboard' %} dashboard-body{% endif %}">
@@ -26,7 +26,7 @@
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark scout-navbar shadow-sm sticky-top">
         <div class="container-fluid px-lg-4">
-            <a class="navbar-brand d-flex align-items-center gap-2" href="{{ url_for('dashboard') }}">
+            <a class="navbar-brand d-flex align-items-center gap-2" href="{{ url_for('home') }}">
                 <img class="scout-navbar-logo"
                      src="{{ url_for('static', filename='images/scout-emblem.png') }}"
                      alt="Scout emblem">
@@ -43,8 +43,13 @@
             <div class="collapse navbar-collapse" id="scoutNav">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-3">
                     <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'home' %}active{% endif %}" href="{{ url_for('home') }}">
+                            <i class="fa-solid fa-house me-1"></i> Home
+                        </a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link {% if request.endpoint == 'dashboard' %}active{% endif %}" href="{{ url_for('dashboard') }}">
-                            <i class="fa-solid fa-gauge-high me-1"></i> dashboard
+                            <i class="fa-solid fa-vault me-1"></i> Treasury
                         </a>
                     </li>
                     <li class="nav-item">
@@ -53,6 +58,11 @@
                         </a>
                     </li>
                     {% if is_admin %}
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'secretary' %}active{% endif %}" href="{{ url_for('secretary') }}">
+                            <i class="fa-solid fa-file-signature me-1"></i> Secretary
+                        </a>
+                    </li>
                     <li class="nav-item">
                         <a class="nav-link {% if request.endpoint == 'users' %}active{% endif %}" href="{{ url_for('users') }}">
                             <i class="fa-solid fa-users me-1"></i> Users
@@ -90,6 +100,7 @@
     </nav>
     {% endif %}
 
+    {% if request.endpoint != 'home' %}
     <div class="container-fluid px-lg-4 mt-2 d-flex justify-content-end language-switch d-print-none" aria-label="Language">
         <a class="btn btn-sm {% if language == 'en' %}btn-dark{% else %}btn-outline-secondary{% endif %}"
            href="{{ url_for('set_language', language='en', next=request.full_path.rstrip('?')) }}"
@@ -99,6 +110,7 @@
            lang="{{ 'ar' if language == 'ar' else 'en' }}"
            dir="{{ 'rtl' if language == 'ar' else 'ltr' }}">{{ 'العربية' if language == 'ar' else 'Arabic' }}</a>
     </div>
+    {% endif %}
 
     <!-- Flash Messages Container -->
     <div class="container-fluid px-lg-4 mt-3 d-print-none">
@@ -133,7 +145,11 @@
     <!-- Footer -->
     <footer class="footer mt-auto py-3 bg-white border-top text-center text-muted small">
         <div class="container">
+            {% if request.endpoint == 'home' %}
+            <span>⚜️ كشاف التربية الوطنية &bull; فوج الدورة &bull; كن مستعداً</span>
+            {% else %}
             <span>⚜️ Scout Treasury &bull; Troop Finance, Made Clear &bull; 2026</span>
+            {% endif %}
         </div>
     </footer>
 

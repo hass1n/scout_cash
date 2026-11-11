@@ -130,10 +130,36 @@ class ScoutFinanceTestCase(unittest.TestCase):
         self.assertIsNone(database.get_transaction(inc_id, self.db_path, owner=OWNER))
 
     def test_auth_and_protected_routes(self):
-        # Accessing dashboard without login redirects to /login
+        # The public home page explains the troop and links to the protected services.
         res = self.client.get('/', follow_redirects=False)
+        self.assertEqual(res.status_code, 200)
+        self.assertIn(b'National Education Scouts', res.data)
+        self.assertIn(b'Treasury', res.data)
+        self.assertIn(b'Secretary', res.data)
+
+        # Treasury and Secretary each enforce their own sign-in requirements.
+        res = self.client.get('/treasury', follow_redirects=False)
         self.assertEqual(res.status_code, 302)
         self.assertIn('/login', res.headers['Location'])
+        secretary_response = self.client.get('/secretary', follow_redirects=False)
+        self.assertEqual(secretary_response.status_code, 302)
+        self.assertIn('/login?next=/secretary', secretary_response.headers['Location'])
+
+        secretary_client = app.test_client()
+        login_page = secretary_client.get(secretary_response.headers['Location'])
+        self.assertIn(b'name="next" value="/secretary"', login_page.data)
+        login_page.close()
+        login_response = secretary_client.post('/login', data={
+            'email': AUTHORIZED_EMAIL,
+            'password': AUTHORIZED_PASSWORD,
+            'next': '/secretary',
+        }, follow_redirects=False)
+        self.assertEqual(login_response.headers['Location'], '/secretary')
+        secretary_page = secretary_client.get('/secretary')
+        self.assertEqual(secretary_page.status_code, 200)
+        self.assertIn('أمانة سر فوج الدورة'.encode('utf-8'), secretary_page.data)
+        self.assertIn(b'href="/"', secretary_page.data)
+        secretary_page.close()
 
         # Attempt invalid login
         res = self.client.post('/login', data={
@@ -203,12 +229,12 @@ class ScoutFinanceTestCase(unittest.TestCase):
         self.assertIn(b'id="period-summary"', res.data)
 
         # Test "This Month" filter view
-        res = self.client.get('/?preset=this_month')
+        res = self.client.get('/treasury?preset=this_month')
         self.assertEqual(res.status_code, 200)
 
         # A custom print report identifies its exact date range.
         res = self.client.get(
-            '/?preset=custom&start_date=2026-10-10&end_date=2026-10-20'
+            '/treasury?preset=custom&start_date=2026-10-10&end_date=2026-10-20'
         )
         self.assertEqual(res.status_code, 200)
         self.assertIn(b'Report period:', res.data)
@@ -237,6 +263,10 @@ class ScoutFinanceTestCase(unittest.TestCase):
         self.assertIn(b'bootstrap.rtl.min.css', response.data)
         self.assertIn(b'js/i18n.js', response.data)
         self.assertIn(b'images/scout-logo.png', response.data)
+
+        response = self.client.get('/')
+        self.assertIn(b'<html lang="ar" dir="rtl">', response.data)
+        self.assertIn('كشاف التربية الوطنية'.encode('utf-8'), response.data)
 
         with self.client.session_transaction() as browser_session:
             browser_session['user'] = AUTHORIZED_EMAIL
@@ -381,6 +411,7 @@ class UserAccountsTestCase(unittest.TestCase):
         database.create_user('U', 'user@example.com', generate_password_hash('secret1'), status='approved')
         self.login('user@example.com', 'secret1')
         self.assertEqual(self.client.get('/users').status_code, 403)
+        self.assertEqual(self.client.get('/secretary').status_code, 403)
         self.assertEqual(self.client.post('/users/create', data={
             'name': 'X', 'email': 'x@example.com', 'password': 'secret1'}).status_code, 403)
         pending_id = database.create_user('P', 'p@example.com', generate_password_hash('secret1'))
@@ -441,7 +472,7 @@ class SeparateTreasuriesTestCase(unittest.TestCase):
         self.sign_in_as('rami@example.com')
         self.add('Rami tents', 75, type_='expense')
 
-        res = self.client.get('/')
+        res = self.client.get('/treasury')
         self.assertIn(b'Rami tents', res.data)
         self.assertNotIn(b'Ali dues', res.data)
         self.assertNotIn(b'Ali dues', self.client.get('/export').data)
@@ -468,7 +499,7 @@ class SeparateTreasuriesTestCase(unittest.TestCase):
         database.add_transaction('income', 300, 'USD', 'Ali dues', owner='ali@example.com')
         self.sign_in_as(AUTHORIZED_EMAIL, AUTHORIZED_PASSWORD)
         self.add('Admin donation', 50)
-        res = self.client.get('/')
+        res = self.client.get('/treasury')
         self.assertIn(b'Admin donation', res.data)
         self.assertNotIn(b'Ali dues', res.data)
 
@@ -503,7 +534,7 @@ class SeparateTreasuriesTestCase(unittest.TestCase):
         # Ali is signed in on another device
         ali_client = app.test_client()
         ali_client.post('/login', data={'email': 'ali@example.com', 'password': 'secret1'})
-        self.assertEqual(ali_client.get('/').status_code, 200)
+        self.assertEqual(ali_client.get('/treasury').status_code, 200)
 
         self.sign_in_as(AUTHORIZED_EMAIL, AUTHORIZED_PASSWORD)
         res = self.client.get('/users')
@@ -517,7 +548,7 @@ class SeparateTreasuriesTestCase(unittest.TestCase):
         self.assertEqual(len(database.get_transactions(owner='rami@example.com')), 1)
 
         # Ali's open session ends on the next click, and Ali can no longer sign in
-        res = ali_client.get('/', follow_redirects=True)
+        res = ali_client.get('/treasury', follow_redirects=True)
         self.assertIn(b'Your account is no longer active', res.data)
         res = ali_client.post('/login', data={'email': 'ali@example.com', 'password': 'secret1'}, follow_redirects=True)
         self.assertIn(b'Invalid email or password', res.data)
@@ -541,7 +572,7 @@ class SeparateTreasuriesTestCase(unittest.TestCase):
         self.assertEqual(database.get_devices('rami.new@example.com')[0]['token'], 'rami-phone')
 
         # The old sign-in no longer works; the new email with the unchanged password does
-        self.assertIn(b'no longer active', rami_client.get('/', follow_redirects=True).data)
+        self.assertIn(b'no longer active', rami_client.get('/treasury', follow_redirects=True).data)
         res = rami_client.post('/login', data={'email': 'rami.new@example.com', 'password': 'secret1'}, follow_redirects=True)
         self.assertIn(b'Rami dues', res.data)
 
