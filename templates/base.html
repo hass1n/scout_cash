@@ -17,7 +17,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css', v='19') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css', v='20') }}">
     {% block extra_head %}{% endblock %}
 </head>
 <body class="bg-light{% if request.endpoint == 'dashboard' %} dashboard-body{% endif %}">
@@ -27,9 +27,9 @@
     <nav class="navbar navbar-expand-lg navbar-dark scout-navbar shadow-sm sticky-top">
         <div class="container-fluid px-lg-4">
             <a class="navbar-brand d-flex align-items-center gap-2" href="{{ url_for('dashboard') }}">
-                <span class="scout-badge-icon">
-                    <i class="fa-solid fa-campground"></i>
-                </span>
+                <img class="scout-navbar-logo"
+                     src="{{ url_for('static', filename='images/scout-emblem.png') }}"
+                     alt="Scout emblem">
                 <div>
                     <span class="fw-bold fs-5 tracking-tight">Scout Treasury</span>
                     <span class="d-none d-sm-inline text-light-50 small ms-1">| صندوق الكشاف</span>
@@ -65,15 +65,6 @@
                 </ul>
 
                 <div class="navbar-actions d-flex align-items-center gap-2 flex-wrap">
-                    {% if request.endpoint == 'dashboard' %}
-                    <button class="btn btn-scout-accent btn-sm px-3 shadow-sm" data-bs-toggle="modal" data-bs-target="#incomeModal">
-                        <i class="fa-solid fa-arrow-down-left me-1"></i> + Income (وارد)
-                    </button>
-                    <button class="btn btn-outline-danger-scout btn-sm px-3 shadow-sm" data-bs-toggle="modal" data-bs-target="#expenseModal">
-                        <i class="fa-solid fa-arrow-up-right me-1"></i> - Expense (مصروف)
-                    </button>
-                    {% endif %}
-
                     <div class="dropdown ms-lg-2">
                         <button class="btn btn-scout-user btn-sm dropdown-toggle d-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                             <span class="avatar-circle"><i class="fa-solid {% if is_admin %}fa-user-shield{% else %}fa-user{% endif %}"></i></span>
