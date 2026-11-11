@@ -159,9 +159,12 @@ class ScoutFinanceTestCase(unittest.TestCase):
         self.assertIn(b'images/scout-emblem.png', res.data)
         self.assertNotIn(b'+ Income (', res.data)
         self.assertNotIn(b'- Expense (', res.data)
+        self.assertIn(b'USD Wallet', res.data)
+        self.assertIn(b'LBP Wallet', res.data)
+        self.assertNotIn(b'fa-cedi-sign', res.data)
         self.assertIn(b'images/scout-logo.png', res.data)
-        self.assertIn(b'$ Wallet', res.data)
-        self.assertIn('ل.ل Wallet'.encode('utf-8'), res.data)
+        self.assertIn(b'USD Wallet', res.data)
+        self.assertIn(b'LBP Wallet', res.data)
 
         # Now test adding transaction through web endpoint
         res = self.client.post('/transaction/add', data={
